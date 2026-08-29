@@ -8,7 +8,7 @@
 <style>
 :root{
   --bg:#f6f7fb;--ink:#121526;--muted:#777c91;--card:#ffffff;--line:#e8eaf2;
-  --accent:#625cff;--accent2:#7d78ff;--dark:#0d1021;--dark2:#171a35;--good:#1a9b6f;
+  --accent:#625cff;--dark:#0d1021;--dark2:#171a35;--good:#1a9b6f;
   --shadow:0 18px 55px rgba(31,35,72,.10);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -22,11 +22,14 @@ button{font:inherit;color:inherit}
 .brand{font-size:19px;font-weight:850;letter-spacing:.16em}.brand span{color:var(--accent)}
 .profile{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted)}
 .avatar{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:var(--dark);color:#fff;font-size:11px;font-weight:800;box-shadow:0 8px 22px rgba(13,16,33,.18)}
-.screen{display:none;animation:screenIn .28s ease}.screen.active{display:block}@keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.screen{display:none;animation:screenIn .28s ease}.screen.active{display:block}
+@keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:10px;font-weight:800;color:var(--muted)}
 h1{font-size:43px;line-height:1.01;letter-spacing:-.045em;margin:28px 0 12px;font-weight:780}
 h2{font-size:29px;line-height:1.12;letter-spacing:-.03em;margin:14px 0 10px;font-weight:760}
+h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .lead{font-size:16px;line-height:1.55;color:#555b70;margin:0}
+
 .heroToday{margin:28px 0 16px;padding:27px;border-radius:28px;color:white;background:
  radial-gradient(circle at 85% 0%,rgba(141,134,255,.75),transparent 34%),
  linear-gradient(145deg,#11142a 5%,#191d3b 68%,#27234e);box-shadow:0 24px 60px rgba(28,29,72,.24);position:relative;overflow:hidden}
@@ -36,38 +39,121 @@ h2{font-size:29px;line-height:1.12;letter-spacing:-.03em;margin:14px 0 10px;font
 .heroToday h2{font-size:32px;max-width:330px;margin:28px 0 11px;color:white}
 .heroToday p{max-width:360px;color:#c9ccdb;font-size:14px;line-height:1.5;margin:0 0 24px}
 .btn{border:0;border-radius:17px;background:var(--dark);color:#fff;padding:15px 18px;width:100%;font-weight:780;font-size:13px;letter-spacing:.045em;cursor:pointer;transition:.18s transform,.18s opacity,.18s box-shadow}
-.btn:active{transform:scale(.985)}.btn.accent{background:linear-gradient(135deg,#6a63ff,#554eff);box-shadow:0 12px 25px rgba(98,92,255,.28)}
-.heroToday .btn{background:white;color:var(--dark);box-shadow:none}
+.btn:active{transform:scale(.985)}
+.btn.accent{background:linear-gradient(135deg,#6a63ff,#554eff);box-shadow:0 12px 25px rgba(98,92,255,.28)}
 .btn.secondary{background:#f1f2f7;color:var(--ink)}
+.btn[disabled]{opacity:.45;cursor:default}
+.heroToday .btn{background:white;color:var(--dark);box-shadow:none}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px}
 .tile{border:1px solid var(--line);background:rgba(255,255,255,.86);backdrop-filter:blur(8px);border-radius:22px;padding:17px;text-align:left;min-height:124px;cursor:pointer;box-shadow:0 8px 30px rgba(34,38,74,.04);display:flex;flex-direction:column;justify-content:space-between}
-.tileTop{display:flex;align-items:center;justify-content:space-between}.ico{width:35px;height:35px;border-radius:12px;background:#f0efff;color:var(--accent);display:grid;place-items:center;font-size:16px;font-weight:850}.arr{color:#b3b7c8;font-size:18px}.tile b{font-size:15px;display:block;margin-top:17px}.tile span{font-size:11.5px;line-height:1.35;color:var(--muted);display:block;margin-top:5px}
+.tileTop{display:flex;align-items:center;justify-content:space-between}
+.ico{width:35px;height:35px;border-radius:12px;background:#f0efff;color:var(--accent);display:grid;place-items:center;font-size:16px;font-weight:850}
+.arr{color:#b3b7c8;font-size:18px}
+.tile b{font-size:15px;display:block;margin-top:17px}
+.tile span{font-size:11.5px;line-height:1.35;color:var(--muted);display:block;margin-top:5px}
 .goal{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px 18px;margin-top:16px;color:var(--muted);font-size:12px;box-shadow:0 8px 30px rgba(34,38,74,.035)}
-.goal strong{display:block;color:var(--ink);font-size:14px;margin-top:5px;line-height:1.45}.goalRow{display:flex;gap:12px;align-items:flex-start}.goalMark{width:30px;height:30px;flex:0 0 auto;border-radius:10px;background:#effaf6;color:var(--good);display:grid;place-items:center;font-weight:900}
+.goal strong{display:block;color:var(--ink);font-size:14px;margin-top:5px;line-height:1.45}
+.goalRow{display:flex;gap:12px;align-items:flex-start}
+.goalMark{width:30px;height:30px;flex:0 0 auto;border-radius:10px;background:#effaf6;color:var(--good);display:grid;place-items:center;font-weight:900}
 .back{background:none;border:0;padding:10px 0 12px;color:var(--muted);cursor:pointer;font-size:13px}
+
 .darkScreen{margin:0 -18px;padding:0 20px 34px;min-height:calc(100vh - 74px);background:
  radial-gradient(circle at 50% 20%,rgba(98,92,255,.26),transparent 30%),linear-gradient(180deg,var(--dark2),var(--dark));color:white;border-radius:30px 30px 0 0}
-.darkScreen .back{color:#aeb2c9}.jury{text-align:center;padding-top:12px}.jury .eyebrow{color:#999eb7}
+.darkScreen .back{color:#aeb2c9}
+.jury{text-align:center;padding-top:12px}
+.jury .eyebrow{color:#999eb7}
 .orb{width:148px;height:148px;margin:37px auto 28px;border-radius:50%;position:relative;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#8d88ff,#5a54ee 38%,#242750 70%);box-shadow:0 0 0 18px rgba(114,107,255,.07),0 0 80px rgba(98,92,255,.30);animation:breathe 3.2s ease-in-out infinite}
-.orb:before,.orb:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.20)}.orb:before{inset:22px}.orb:after{inset:43px;background:rgba(255,255,255,.10)}
+.orb:before,.orb:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.20)}
+.orb:before{inset:22px}.orb:after{inset:43px;background:rgba(255,255,255,.10)}
 @keyframes breathe{50%{transform:scale(1.035);box-shadow:0 0 0 24px rgba(114,107,255,.05),0 0 95px rgba(98,92,255,.4)}}
 .timer{font-variant-numeric:tabular-nums;font-size:12px;color:#9ca1ba;letter-spacing:.12em;text-transform:uppercase}
+.timer.urgent{color:#ffb4a8}
 .question{font-size:27px;line-height:1.25;letter-spacing:-.025em;margin:26px auto 24px;max-width:430px;font-weight:680}
 .transcript{min-height:92px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;text-align:left;color:#afb4ca;line-height:1.5;margin:18px 0 17px;font-size:13px}
-.controls{display:flex;gap:10px}.darkScreen .btn.secondary{background:rgba(255,255,255,.08);color:white;border:1px solid rgba(255,255,255,.08)}.controls .btn{flex:1}
+.darkScreen .btn.secondary{background:rgba(255,255,255,.08);color:white;border:1px solid rgba(255,255,255,.08)}
 .card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:23px;padding:20px;margin:18px 0;box-shadow:var(--shadow)}
-.images{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}.imageCard{aspect-ratio:4/5;border-radius:24px;overflow:hidden;position:relative;cursor:pointer;box-shadow:0 14px 36px rgba(28,32,67,.12);transition:.2s transform}.imageCard:active{transform:scale(.985)}
-.imageCard:nth-child(1){background:linear-gradient(160deg,#f0c39f 0%,#7d4f45 48%,#292238 100%)}.imageCard:nth-child(2){background:linear-gradient(150deg,#aec6e8 0%,#5d7298 44%,#1b263d 100%)}
-.imageCard:before{content:"";position:absolute;inset:18% 17%;border-radius:50% 50% 42% 45%;background:rgba(255,255,255,.17);filter:blur(1px)}
-.imageCard:after{content:attr(data-label);position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);padding:7px 10px;border-radius:999px;font-size:10px;font-weight:850;letter-spacing:.08em}
-.promptCard{background:var(--dark);color:white;border-radius:22px;padding:19px;margin-top:15px;line-height:1.5;font-size:14px}.promptCard b{color:#a5a0ff}.promptCard .btn{margin-top:14px;background:white;color:var(--dark)}
-.challenge{background:linear-gradient(145deg,#fff,#f2f1ff);border:1px solid #e9e7ff;border-radius:26px;padding:23px;margin:21px 0;box-shadow:var(--shadow)}.challenge .timer{color:var(--accent);font-weight:850}.quote{font-size:22px;line-height:1.32;letter-spacing:-.02em;font-weight:690;margin:20px 0 24px}
-.metricCard{background:var(--dark);color:white;border-radius:28px;padding:22px;margin:20px 0;box-shadow:0 22px 55px rgba(13,16,33,.20)}.metric{margin:19px 0}.metric:first-child{margin-top:3px}.metricHead{display:flex;justify-content:space-between;font-size:12px;color:#b6bbcf}.metricHead b{color:white}.bar{height:7px;background:rgba(255,255,255,.10);border-radius:20px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#817bff,#b0adff);border-radius:20px}.good{color:var(--good)}
-.statStrip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px 12px}.stat b{display:block;font-size:21px;letter-spacing:-.03em}.stat span{display:block;font-size:10px;color:var(--muted);margin-top:4px;line-height:1.25}
-.debriefHero{background:linear-gradient(145deg,#171a36,#0d1021);color:white;border-radius:28px;padding:24px;margin:16px 0 20px}.debriefHero .eyebrow{color:#9ea3bd}.debriefHero h2{color:white;margin-top:14px}.tag{display:inline-flex;border-radius:999px;background:#eeecff;color:var(--accent);padding:7px 10px;font-size:10px;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
+.quote{font-size:22px;line-height:1.32;letter-spacing:-.02em;font-weight:690;margin:20px 0 24px}
 
+.images{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+.imageCard{border-radius:24px;overflow:hidden;position:relative;cursor:pointer;box-shadow:0 14px 36px rgba(28,32,67,.12);transition:.2s transform;background:#20233f;display:flex;flex-direction:column}
+.imageCard:active{transform:scale(.985)}
+.imageVisual{aspect-ratio:4/5;width:100%;position:relative;background-size:cover;background-position:center}
+.imageVisual.placeholderA{background-image:linear-gradient(160deg,#f0c39f 0%,#7d4f45 48%,#292238 100%)}
+.imageVisual.placeholderB{background-image:linear-gradient(150deg,#aec6e8 0%,#5d7298 44%,#1b263d 100%)}
+.placeholderMark{position:absolute;left:10px;top:10px;background:rgba(12,14,30,.72);color:#ffd7c9;padding:5px 8px;border-radius:8px;font-size:9px;font-weight:850;letter-spacing:.08em}
+.imageLabel{position:absolute;left:10px;bottom:10px;background:rgba(255,255,255,.92);padding:6px 9px;border-radius:999px;font-size:10px;font-weight:850;letter-spacing:.08em;color:var(--dark)}
+.imageCaption{padding:11px 12px 13px;font-size:10.5px;line-height:1.4;color:#c6cadb;background:rgba(255,255,255,.05)}
+.imageCaption b{display:block;color:#fff;font-size:11.5px;margin-bottom:3px;font-weight:750}
+.imageCaption i{display:block;font-style:normal;color:#9299b2;margin-top:4px;font-size:9.5px}
 
-/* Voice-first oral prototype */
+.imageExperience{margin:22px 0 14px;padding:18px;border-radius:28px;color:#fff;background:radial-gradient(circle at 88% 0%,rgba(125,120,255,.46),transparent 30%),linear-gradient(145deg,#11142a,#1a1f45 66%,#2b2557);box-shadow:0 18px 44px rgba(28,29,72,.20)}
+.imageExperienceTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.imageExperienceTop b{font-size:10px;letter-spacing:.13em}
+.difficulty{font-size:10px;color:#dfe2ec;background:rgba(255,255,255,.10);border-radius:999px;padding:7px 9px}
+.imageExperience .images{margin:0}
+.imageExperience .imageCard{box-shadow:none;border:2px solid transparent}
+.imageExperience .imageCard.selected{border-color:#918bff;box-shadow:0 0 0 4px rgba(145,139,255,.18)}
+.imageExperience .imageCard.selected .check{display:grid}
+.check{display:none;position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;place-items:center;background:rgba(255,255,255,.92);color:var(--accent);font-weight:900;z-index:2}
+.imagePrep{margin-top:14px;padding:15px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.055);font-size:13px;line-height:1.48;color:#d9ddea}
+.imagePrep b{display:block;color:#b8b4ff;text-transform:uppercase;letter-spacing:.1em;font-size:10px;margin-bottom:7px}
+.prepRow{display:flex;justify-content:space-between;align-items:center;color:#bdc2d2;font-size:11px;margin-top:13px}
+.prepRow strong{font-variant-numeric:tabular-nums;font-size:14px;color:#fff}
+.imagePrep .btn{margin-top:12px;background:#fff;color:var(--dark)}
+.oralVisual{margin:14px auto 4px;max-width:260px;border-radius:20px;overflow:hidden;background:#1b1f3d}
+.oralVisual .imageVisual{aspect-ratio:4/3}
+.oralVisualCaption{font-size:10px;line-height:1.4;color:#9aa0b8;margin:8px auto 0;max-width:300px}
+
+.imageStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:13px 0 4px}
+.imageStat{background:#fff;border:1px solid var(--line);border-radius:17px;padding:13px 11px}
+.imageStat b{font-size:17px}
+.imageStat span{display:block;font-size:9.5px;line-height:1.3;color:var(--muted);margin-top:4px}
+
+.challenge{background:linear-gradient(145deg,#fff,#f2f1ff);border:1px solid #e9e7ff;border-radius:26px;padding:23px;margin:21px 0;box-shadow:var(--shadow)}
+.challenge .timer{color:var(--accent);font-weight:850}
+
+.periodRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 12px}
+.periodBtns{display:flex;gap:6px}
+.periodBtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 9px;font-size:10px;font-weight:800;color:#687082;cursor:pointer}
+.periodBtn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.delta{font-size:11px;color:var(--accent);font-weight:850}
+.trendCard{background:var(--dark);color:#fff;border-radius:28px;padding:21px;margin:0 0 17px;box-shadow:0 20px 48px rgba(13,16,33,.19)}
+.trendHead{display:flex;justify-content:space-between;align-items:flex-end}
+.trendHead span{font-size:10px;color:#b9bfd0}
+.trendHead b{display:block;font-size:29px;margin-top:2px}
+.trendCard svg{display:block;width:100%;height:auto;margin-top:10px}
+.gridLine{stroke:rgba(255,255,255,.09);stroke-width:1}
+.trendLine{fill:none;stroke:#8e88ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.trendArea{fill:url(#trendGradient)}
+.axisLabel{fill:#8f97aa;font-size:9px}
+.sparkTitle{font-size:12px;font-weight:850;color:#505768;margin:18px 0 10px}
+.sparkGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.sparkCard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px}
+.sparkHead{display:flex;justify-content:space-between;font-size:11px;color:#5d6575}
+.sparkHead b{font-size:15px;color:var(--ink)}
+.sparkBar{height:6px;background:#eef0f6;border-radius:20px;margin-top:9px;overflow:hidden}
+.sparkBar i{display:block;height:100%;background:linear-gradient(90deg,#817bff,#b0adff);border-radius:20px}
+.reportCard{background:#fff;border:1px solid var(--line);border-radius:23px;padding:19px;margin-top:17px;box-shadow:0 9px 30px rgba(34,38,74,.045)}
+.reportTop{display:flex;justify-content:space-between;gap:10px}
+.reportTop b{font-size:10px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
+.reportTop span{font-size:9px;color:#858c9b}
+.reportCard p{font-size:13px;line-height:1.55;color:#555e70;margin:0}
+.nextGoal{background:#f1f0ff;border-radius:16px;padding:13px;margin-top:13px}
+.nextGoal b{display:block;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.09em}
+.nextGoal span{display:block;font-size:12px;line-height:1.4;margin-top:5px;color:#303544}
+.emptyState{background:#fff;border:1px dashed #d6dae8;border-radius:22px;padding:22px;margin:18px 0;color:#606779;font-size:13px;line-height:1.55}
+.emptyState b{display:block;color:var(--ink);font-size:15px;margin-bottom:7px}
+.hidden{display:none}
+
+.debriefHero{background:linear-gradient(145deg,#171a36,#0d1021);color:white;border-radius:28px;padding:24px;margin:16px 0 20px}
+.debriefHero .eyebrow{color:#9ea3bd}
+.debriefHero h2{color:white;margin-top:14px}
+.tag{display:inline-flex;border-radius:999px;background:#eeecff;color:var(--accent);padding:7px 10px;font-size:10px;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
+.dimList{margin:14px 0 0;padding:0;list-style:none}
+.dimRow{display:flex;justify-content:space-between;font-size:12px;color:#5d6575;padding:7px 0;border-top:1px solid var(--line)}
+.dimRow b{color:var(--ink)}
+.note{font-size:10.5px;line-height:1.5;color:#8a90a1;margin-top:12px}
+
 .voiceState{display:inline-flex;align-items:center;gap:8px;margin:2px 0 8px;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#b8bdd0;font-weight:800}
 .voiceState i{width:7px;height:7px;border-radius:50%;background:#8c86ff;box-shadow:0 0 0 6px rgba(140,134,255,.10)}
 .voiceState.listening i{background:#fff;animation:micPulse 1.1s ease-in-out infinite}
@@ -80,8 +166,8 @@ h2{font-size:29px;line-height:1.12;letter-spacing:-.03em;margin:14px 0 10px;font
 .micLabel{font-size:10px;font-weight:850;letter-spacing:.10em;text-transform:uppercase;color:#d5d7e3;margin-bottom:8px}
 .transcript.voiceTranscript{min-height:68px;margin-top:13px;background:rgba(255,255,255,.04);font-size:12px;color:#aeb4c9}
 .transcript.voiceTranscript.empty{display:none}
-.voiceControls{display:flex;gap:10px;margin-top:12px}.voiceControls .btn{flex:1}
-.voiceControls .btn.secondary{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.08);color:#fff}
+.voiceControls{display:flex;gap:10px;margin-top:12px}
+.voiceControls .btn{flex:1}
 .voiceError{display:none;margin-top:12px;border-radius:14px;background:rgba(255,255,255,.06);padding:11px 13px;color:#c5c9d7;font-size:11px;line-height:1.45}
 .voiceError.show{display:block}
 .voiceError b{color:white}
@@ -89,55 +175,49 @@ h2{font-size:29px;line-height:1.12;letter-spacing:-.03em;margin:14px 0 10px;font
 .voiceProgress span{width:22px;height:3px;border-radius:10px;background:rgba(255,255,255,.11)}
 .voiceProgress span.on{background:#817bff}
 
-/* V2 — Défi image immersif + progression longitudinale */
-.imageExperience{margin:22px 0 14px;padding:18px;border-radius:28px;color:#fff;background:radial-gradient(circle at 88% 0%,rgba(125,120,255,.46),transparent 30%),linear-gradient(145deg,#11142a,#1a1f45 66%,#2b2557);box-shadow:0 18px 44px rgba(28,29,72,.20)}
-.imageExperienceTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.imageExperienceTop b{font-size:10px;letter-spacing:.13em}.difficulty{font-size:10px;color:#dfe2ec;background:rgba(255,255,255,.10);border-radius:999px;padding:7px 9px}
-.imageExperience .images{margin:0}.imageExperience .imageCard{box-shadow:none;border:2px solid transparent}.imageExperience .imageCard.selected{border-color:#918bff;box-shadow:0 0 0 4px rgba(145,139,255,.18)}
-.imageExperience .imageCard.selected .check{display:grid}.check{display:none;position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;place-items:center;background:rgba(255,255,255,.92);color:var(--accent);font-weight:900;z-index:2}
-.imagePrep{margin-top:14px;padding:15px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.055);font-size:13px;line-height:1.48;color:#d9ddea}.imagePrep b{display:block;color:#b8b4ff;text-transform:uppercase;letter-spacing:.1em;font-size:10px;margin-bottom:7px}.prepRow{display:flex;justify-content:space-between;color:#bdc2d2;font-size:11px;margin-top:13px}.imagePrep .btn{margin-top:12px;background:#fff;color:var(--dark)}
-.imageStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:13px 0 4px}.imageStat{background:#fff;border:1px solid var(--line);border-radius:17px;padding:13px 11px}.imageStat b{font-size:17px}.imageStat span{display:block;font-size:9.5px;line-height:1.3;color:var(--muted);margin-top:4px}
-.periodRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 12px}.periodBtns{display:flex;gap:6px}.periodBtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 9px;font-size:10px;font-weight:800;color:#687082}.periodBtn.active{background:var(--dark);color:#fff;border-color:var(--dark)}.delta{font-size:11px;color:var(--accent);font-weight:850}
-.trendCard{background:var(--dark);color:#fff;border-radius:28px;padding:21px;margin:0 0 17px;box-shadow:0 20px 48px rgba(13,16,33,.19)}.trendHead{display:flex;justify-content:space-between;align-items:flex-end}.trendHead span{font-size:10px;color:#b9bfd0}.trendHead b{display:block;font-size:29px;margin-top:2px}.trendCard svg{display:block;width:100%;height:auto;margin-top:10px}.gridLine{stroke:rgba(255,255,255,.09);stroke-width:1}.trendLine{fill:none;stroke:#8e88ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.trendArea{fill:url(#trendGradient)}.trendPoint{fill:#fff;stroke:#8e88ff;stroke-width:3}.axisLabel{fill:#8f97aa;font-size:9px}
-.sparkTitle{font-size:12px;font-weight:850;color:#505768;margin:18px 0 10px}.sparkGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.sparkCard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px}.sparkHead{display:flex;justify-content:space-between;font-size:11px;color:#5d6575}.sparkHead b{font-size:15px;color:var(--ink)}.sparkCard svg{width:100%;height:38px;margin-top:6px}.sparkLine{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.reportCard{background:#fff;border:1px solid var(--line);border-radius:23px;padding:19px;margin-top:17px;box-shadow:0 9px 30px rgba(34,38,74,.045)}.reportTop{display:flex;justify-content:space-between;gap:10px}.reportTop b{font-size:10px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}.reportTop span{font-size:9px;color:#858c9b}.reportCard h3{font-size:19px;line-height:1.3;margin:12px 0 9px}.reportCard p{font-size:13px;line-height:1.55;color:#555e70}.nextGoal{background:#f1f0ff;border-radius:16px;padding:13px;margin-top:13px}.nextGoal b{display:block;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.09em}.nextGoal span{display:block;font-size:12px;line-height:1.4;margin-top:5px;color:#303544}
-
 @media(min-width:700px){body{padding:20px}.app{min-height:calc(100vh - 40px);border-radius:34px;background:var(--bg);box-shadow:0 25px 100px rgba(30,34,70,.13)}}
 </style>
 </head>
 <body>
 <main class="app">
-<header class="top"><div class="brand">AGORA<span>.</span></div><div class="profile"><span>7 jours</span><div class="avatar">P</div></div></header>
+<header class="top">
+  <div class="brand">AGORA<span>.</span></div>
+  <div class="profile"><span id="streakLabel">1re séance</span><div class="avatar" id="avatarInitial">P</div></div>
+</header>
 
 <section id="home" class="screen active">
-  <div class="eyebrow">Vendredi 28 août</div>
-  <h1>Prêt pour<br>8 minutes ?</h1>
+  <div class="eyebrow" id="dateLabel">—</div>
+  <h1 id="homeTitle">Prêt pour<br>8 minutes ?</h1>
   <p class="lead">Un entraînement ciblé, construit autour de ta progression.</p>
 
   <div class="heroToday">
-    <div class="heroMeta"><span class="pulseDot"></span>Aujourd’hui · 8 min</div>
-    <h2>Voir juste avant d’interpréter.</h2>
-    <p>Deux images. Une lecture. Puis le jury vient tester ton raisonnement.</p>
-    <button class="btn" onclick="show('image')">LANCER LA SÉANCE</button>
+    <div class="heroMeta"><span class="pulseDot"></span><span id="todayMeta">Aujourd’hui · 8 min</span></div>
+    <h2 id="todayTitle">Voir juste avant d’interpréter.</h2>
+    <p id="todayDesc">Deux images. Une lecture. Puis le jury vient tester ton raisonnement.</p>
+    <button class="btn" id="todayBtn">LANCER LA SÉANCE</button>
   </div>
 
   <div class="grid">
-    <button class="tile" onclick="startStandardOral()"><div class="tileTop"><div class="ico">◉</div><div class="arr">↗</div></div><div><b>Oral blanc</b><span>≈ 25 min · conditions entretien</span></div></button>
-    <button class="tile" onclick="show('image')"><div class="tileTop"><div class="ico">▧</div><div class="arr">↗</div></div><div><b>Défi image</b><span>Analyse, nuance, contradiction</span></div></button>
-    <button class="tile" onclick="show('culture')"><div class="tileTop"><div class="ico">↯</div><div class="arr">↗</div></div><div><b>Culture & idées</b><span>Réfléchir vite, argumenter mieux</span></div></button>
-    <button class="tile" onclick="show('progress')"><div class="tileTop"><div class="ico">↗</div><div class="arr">↗</div></div><div><b>Progression</b><span>Forces, angles morts, évolution</span></div></button>
+    <button class="tile" id="tileOral"><div class="tileTop"><div class="ico">◉</div><div class="arr">↗</div></div><div><b>Oral blanc</b><span>≈ 25 min · conditions entretien</span></div></button>
+    <button class="tile" id="tileImage"><div class="tileTop"><div class="ico">▧</div><div class="arr">↗</div></div><div><b>Défi image</b><span>Analyse, nuance, contradiction</span></div></button>
+    <button class="tile" id="tileCulture"><div class="tileTop"><div class="ico">↯</div><div class="arr">↗</div></div><div><b>Culture &amp; idées</b><span>Réfléchir vite, argumenter mieux</span></div></button>
+    <button class="tile" id="tileProgress"><div class="tileTop"><div class="ico">↗</div><div class="arr">↗</div></div><div><b>Progression</b><span>Forces, angles morts, évolution</span></div></button>
   </div>
 
-  <div class="goal"><div class="goalRow"><div class="goalMark">✓</div><div>Priorité actuelle<strong>Répondre directement avant de développer.</strong></div></div></div>
+  <div class="goal"><div class="goalRow"><div class="goalMark">✓</div><div>Priorité actuelle<strong id="priorityText">Répondre directement avant de développer.</strong></div></div></div>
 </section>
 
 <section id="oral" class="screen">
   <div class="darkScreen">
-    <button class="back" onclick="quitOral()">← Quitter l’oral</button>
+    <button class="back" id="oralBack">← Quitter l’oral</button>
     <div class="jury">
       <div class="eyebrow" id="oralPhase">ORAL BLANC · PRÉSENTATION</div>
       <div class="voiceState" id="voiceState"><i></i><span>prêt</span></div>
 
       <div class="orb" id="voiceOrb"></div>
+
+      <div class="oralVisual hidden" id="oralVisual"><div class="imageVisual placeholderA" id="oralVisualImg"></div></div>
+      <div class="oralVisualCaption hidden" id="oralVisualCaption"></div>
 
       <div class="timer" id="timer">02:00 · présentation</div>
       <div class="question" id="q">Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.</div>
@@ -146,17 +226,15 @@ h2{font-size:29px;line-height:1.12;letter-spacing:-.03em;margin:14px 0 10px;font
         <span class="on" id="p1"></span><span id="p2"></span><span id="p3"></span>
       </div>
 
-      <button class="micButton" id="micButton" onclick="toggleListening()" aria-label="Parler au jury">
-        <span class="micIcon">●</span>
-      </button>
+      <button class="micButton" id="micButton" aria-label="Parler au jury"><span class="micIcon">●</span></button>
       <div class="micLabel" id="micLabel">LANCER L’ORAL</div>
       <div class="voiceHint" id="voiceHint">Le jury posera la question à voix haute. Réponds ensuite naturellement, comme le jour de l’entretien.</div>
 
       <div class="transcript voiceTranscript empty" id="liveTranscript"></div>
 
       <div class="voiceControls">
-        <button class="btn secondary" onclick="restartOral()">RECOMMENCER</button>
-        <button class="btn secondary" onclick="finishOral()">TERMINER</button>
+        <button class="btn secondary" id="oralRestart">RECOMMENCER</button>
+        <button class="btn secondary" id="oralFinish">TERMINER</button>
       </div>
 
       <div class="voiceError" id="voiceError"></div>
@@ -165,429 +243,1162 @@ h2{font-size:29px;line-height:1.12;letter-spacing:-.03em;margin:14px 0 10px;font
 </section>
 
 <section id="image" class="screen">
-  <button class="back" onclick="show('home')">← Accueil</button>
+  <button class="back" id="imageBack">← Accueil</button>
   <div class="eyebrow">LE REGARD DU JOUR · 8 MIN</div>
   <h2>Choisis l’image qui te semble la plus riche.</h2>
   <p class="lead">Pas celle que tu comprends le mieux. Celle qui te donne le plus envie d’argumenter.</p>
   <div class="imageExperience">
-    <div class="imageExperienceTop"><b>DÉFI DU JOUR</b><span class="difficulty">Niveau · soutenu</span></div>
+    <div class="imageExperienceTop"><b>DÉFI DU JOUR</b><span class="difficulty" id="imageDifficulty">Niveau —</span></div>
     <div class="images">
-      <div class="imageCard" data-label="IMAGE A" id="imgA" onclick="chooseImage('A')"><span class="check">✓</span></div>
-      <div class="imageCard" data-label="IMAGE B" id="imgB" onclick="chooseImage('B')"><span class="check">✓</span></div>
+      <div class="imageCard" id="imgA">
+        <div class="imageVisual placeholderA" id="imgAVisual"><span class="check">✓</span><span class="imageLabel">IMAGE A</span></div>
+        <div class="imageCaption" id="imgACaption"></div>
+      </div>
+      <div class="imageCard" id="imgB">
+        <div class="imageVisual placeholderB" id="imgBVisual"><span class="check">✓</span><span class="imageLabel">IMAGE B</span></div>
+        <div class="imageCaption" id="imgBCaption"></div>
+      </div>
     </div>
-    <div id="imgPrompt" class="imagePrep"><b>Avant de parler</b>Commence par décrire précisément ce que tu observes. N’interprète pas encore.<div class="prepRow"><span>Préparation libre</span><strong>01:30</strong></div><button class="btn" onclick="startImageOral()">COMMENCER L’ANALYSE</button></div>
+    <div class="imagePrep" id="imgPrompt">
+      <b id="imgPromptTitle">Avant de parler</b>
+      <span id="imgPromptText">Choisis une image, puis décris précisément ce que tu observes. N’interprète pas encore.</span>
+      <div class="prepRow"><span id="prepLabel">Préparation</span><strong id="prepTimer">01:30</strong></div>
+      <button class="btn" id="imgStart" disabled>COMMENCER L’ANALYSE</button>
+    </div>
   </div>
-  <div class="imageStats"><div class="imageStat"><b>12</b><span>images travaillées ce mois</span></div><div class="imageStat"><b>68%</b><span>observation avant interprétation</span></div><div class="imageStat"><b>+9</b><span>progression sur la nuance</span></div></div>
+  <div class="imageStats">
+    <div class="imageStat"><b id="statImages">0</b><span>images travaillées</span></div>
+    <div class="imageStat"><b id="statObs">—</b><span>observation avant interprétation</span></div>
+    <div class="imageStat"><b id="statSessions">0</b><span>séances image enregistrées</span></div>
+  </div>
 </section>
 
 <section id="culture" class="screen">
-  <button class="back" onclick="show('home')">← Accueil</button>
-  <div class="eyebrow">CULTURE & IDÉES · 60 SEC</div>
-  <h2>Une démocratie doit-elle tout tolérer ?</h2>
+  <button class="back" id="cultureBack">← Accueil</button>
+  <div class="eyebrow">CULTURE &amp; IDÉES · 3 MIN</div>
+  <h2 id="cultureQuestion">—</h2>
   <p class="lead">Une position. Une limite. Un exemple. Pas besoin d’en faire davantage.</p>
-  <div class="challenge"><div class="timer">01:00 · réponse libre</div><p class="quote">« Commence par répondre. Les références ne valent que si elles servent ton idée. »</p><button class="btn accent" onclick="this.textContent='ENREGISTREMENT SIMULÉ…'">RÉPONDRE</button></div>
+  <div class="challenge">
+    <div class="timer">03:00 · échange oral</div>
+    <p class="quote">« Commence par répondre. Les références ne valent que si elles servent ton idée. »</p>
+    <button class="btn accent" id="cultureBtn">RÉPONDRE À L’ORAL</button>
+  </div>
   <div class="goal"><div class="goalRow"><div class="goalMark">↯</div><div>Ce que le jury regarde<strong>Ta capacité à construire une position claire puis à la nuancer.</strong></div></div></div>
 </section>
 
 <section id="progress" class="screen">
-  <button class="back" onclick="show('home')">← Accueil</button>
-  <div class="eyebrow">PROGRESSION · 60 JOURS</div>
-  <h2>Tu progresses surtout dans la manière de défendre tes idées.</h2>
+  <button class="back" id="progressBack">← Accueil</button>
+  <div class="eyebrow">PROGRESSION</div>
+  <h2 id="progressTitle">Ta trajectoire</h2>
   <p class="lead">La tendance compte davantage qu’un score isolé.</p>
-  <div class="periodRow"><div class="periodBtns"><button class="periodBtn">30 j</button><button class="periodBtn active">60 j</button><button class="periodBtn">3 mois</button></div><div class="delta">+14 pts</div></div>
-  <div class="trendCard"><div class="trendHead"><div><span>NIVEAU AGORA</span><b>74</b></div><div class="delta">↗ progression régulière</div></div>
-    <svg viewBox="0 0 330 145" role="img" aria-label="Courbe de progression sur neuf semaines"><defs><linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8e88ff" stop-opacity=".28"/><stop offset="100%" stop-color="#8e88ff" stop-opacity="0"/></linearGradient></defs><line class="gridLine" x1="18" y1="32" x2="318" y2="32"/><line class="gridLine" x1="18" y1="72" x2="318" y2="72"/><line class="gridLine" x1="18" y1="112" x2="318" y2="112"/><path class="trendArea" d="M18 108 C55 101 76 93 103 95 S150 79 176 82 S223 65 247 63 S286 50 318 42 L318 125 L18 125 Z"/><path class="trendLine" d="M18 108 C55 101 76 93 103 95 S150 79 176 82 S223 65 247 63 S286 50 318 42"/><circle class="trendPoint" cx="18" cy="108" r="4"/><circle class="trendPoint" cx="103" cy="95" r="4"/><circle class="trendPoint" cx="176" cy="82" r="4"/><circle class="trendPoint" cx="247" cy="63" r="4"/><circle class="trendPoint" cx="318" cy="42" r="4"/><text class="axisLabel" x="18" y="140">S1</text><text class="axisLabel" x="96" y="140">S3</text><text class="axisLabel" x="169" y="140">S5</text><text class="axisLabel" x="241" y="140">S7</text><text class="axisLabel" x="305" y="140">S9</text></svg>
+
+  <div class="emptyState" id="progressEmpty">
+    <b>Pas encore assez de séances.</b>
+    Une courbe n’a de sens qu’à partir de trois séances terminées. AGORA préfère ne rien afficher plutôt qu’une progression inventée.
   </div>
-  <div class="sparkTitle">Évolution par compétence</div><div class="sparkGrid">
-    <div class="sparkCard"><div class="sparkHead"><span>Argumentation</span><b>81</b></div><svg viewBox="0 0 120 38"><path class="sparkLine" d="M4 30 C18 29 24 25 37 26 S55 18 68 19 S91 10 116 8"/></svg></div>
-    <div class="sparkCard"><div class="sparkHead"><span>Observation</span><b>59</b></div><svg viewBox="0 0 120 38"><path class="sparkLine" d="M4 27 C21 25 29 27 41 22 S61 23 72 18 S97 17 116 13"/></svg></div>
-    <div class="sparkCard"><div class="sparkHead"><span>Nuance</span><b>73</b></div><svg viewBox="0 0 120 38"><path class="sparkLine" d="M4 31 C18 28 27 28 40 23 S60 19 71 17 S94 12 116 9"/></svg></div>
-    <div class="sparkCard"><div class="sparkHead"><span>Clarté</span><b>76</b></div><svg viewBox="0 0 120 38"><path class="sparkLine" d="M4 25 C16 23 26 20 39 21 S61 15 75 16 S99 10 116 7"/></svg></div>
+
+  <div id="progressBody" class="hidden">
+    <div class="periodRow">
+      <div class="periodBtns">
+        <button class="periodBtn" id="period7">7 j</button>
+        <button class="periodBtn active" id="period30">30 j</button>
+        <button class="periodBtn" id="periodAll">Tout</button>
+      </div>
+      <div class="delta" id="trendDelta">—</div>
+    </div>
+    <div class="trendCard">
+      <div class="trendHead"><div><span>NIVEAU AGORA (PROTOTYPE)</span><b id="trendValue">—</b></div><div class="delta" id="trendCount">—</div></div>
+      <svg viewBox="0 0 330 145" role="img" aria-label="Courbe de progression">
+        <defs><linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8e88ff" stop-opacity=".28"/><stop offset="100%" stop-color="#8e88ff" stop-opacity="0"/></linearGradient></defs>
+        <line class="gridLine" x1="18" y1="32" x2="318" y2="32"/>
+        <line class="gridLine" x1="18" y1="72" x2="318" y2="72"/>
+        <line class="gridLine" x1="18" y1="112" x2="318" y2="112"/>
+        <path class="trendArea" id="trendArea" d=""/>
+        <path class="trendLine" id="trendLine" d=""/>
+        <text class="axisLabel" id="axisStart" x="18" y="140"></text>
+        <text class="axisLabel" id="axisEnd" x="288" y="140"></text>
+      </svg>
+    </div>
+    <div class="sparkTitle">Signaux par compétence</div>
+    <div class="sparkGrid" id="sparkGrid"></div>
+    <div class="reportCard">
+      <div class="reportTop"><b>Bilan</b><span id="reportRange">—</span></div>
+      <h3 id="reportTitle">—</h3>
+      <p id="reportText">—</p>
+      <div class="nextGoal"><b>Priorité de la période</b><span id="nextGoalText">—</span></div>
+      <p class="note">Mesures produites par le moteur local à règles du prototype. Elles décrivent des signaux de surface (longueur, exemples, justifications, nuance, ancrage visuel), pas encore la qualité du raisonnement.</p>
+    </div>
   </div>
-  <div class="reportCard"><div class="reportTop"><b>Bilan des 2 dernières semaines</b><span>14–28 août</span></div><h3>Tu vas plus vite à l’essentiel, sans perdre en profondeur.</h3><p>Sur 6 séances, tes réponses sont devenues plus directes et tes contre-arguments sont mieux intégrés. En revanche, sur les images, tu interprètes encore parfois avant d’avoir suffisamment décrit ce que tu vois.</p><div class="nextGoal"><b>Priorité des 7 prochains jours</b><span>Sur chaque image, consacrer les 30 premières secondes exclusivement à l’observation factuelle.</span></div></div>
 </section>
 
 <section id="debrief" class="screen">
-  <button class="back" onclick="show('home')">← Accueil</button>
-  <div class="debriefHero"><div class="eyebrow">DÉBRIEF · 8 MIN 14</div><h2>Ton raisonnement tient. Mais tu démarres trop loin de la question.</h2><span class="tag">priorité : réponse directe</span></div>
-  <div class="card"><div class="eyebrow good">CE QUI A CONVAINCU</div><p>Tu as accepté la contradiction et reformulé ta position sans l’abandonner.</p></div>
-  <div class="card"><div class="eyebrow">À REJOUER</div><p class="quote">« Pourquoi cette expérience te conduit-elle précisément vers Sciences Po ? »</p><button class="btn secondary">REJOUER CETTE RÉPONSE</button></div>
-  <button class="btn accent" onclick="show('home')">TERMINER</button>
+  <button class="back" id="debriefBack">← Accueil</button>
+  <div class="debriefHero">
+    <div class="eyebrow" id="debriefMeta">DÉBRIEF</div>
+    <h2 id="debriefTitle">—</h2>
+    <span class="tag" id="debriefTag">—</span>
+  </div>
+  <div class="card">
+    <div class="eyebrow">CE QUI A CONVAINCU</div>
+    <p id="debriefStrength">—</p>
+    <p id="debriefStrength2">—</p>
+  </div>
+  <div class="card">
+    <div class="eyebrow">CE QUI A FRAGILISÉ</div>
+    <p id="debriefImprove">—</p>
+  </div>
+  <div class="card">
+    <div class="eyebrow">À REJOUER</div>
+    <p class="quote" id="debriefReplayQ">—</p>
+    <button class="btn secondary" id="debriefReplay">REJOUER CETTE RÉPONSE</button>
+  </div>
+  <div class="card">
+    <div class="eyebrow">SIGNAUX DE LA SÉANCE</div>
+    <ul class="dimList" id="debriefDims"></ul>
+    <p class="note">Signaux de surface mesurés par le moteur local. Ils ne remplacent pas une évaluation du raisonnement.</p>
+  </div>
+  <button class="btn accent" id="debriefDone">TERMINER</button>
 </section>
 </main>
 <script>
-function show(id){
-  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
+/* ============================================================
+   AGORA — prototype voice-first
+   Lot septembre : couture askJury, persistance, chronomètres,
+   débrief branché, purge des données factices.
+   Moteur de jury : local à règles (JURY_ENGINE = 'rules').
+   ============================================================ */
+
+var PROMPT_VERSION = 'rules-2026-09';
+var JURY_ENGINE = 'rules';           /* 'rules' | 'model' */
+var STORE_KEY = 'agora.v1.state';    /* nom définitif, ne jamais renommer */
+
+/* ---------- utilitaires défensifs ---------- */
+function $(id){ try { return document.getElementById(id); } catch(e){ return null; } }
+function setText(id,v){ var e=$(id); if(e) e.textContent=v; }
+function setHTML(id,v){ var e=$(id); if(e) e.innerHTML=v; }
+function on(id,fn){ var e=$(id); if(e) e.addEventListener('click',fn); }
+function showEl(id,visible){ var e=$(id); if(e) e.classList.toggle('hidden',!visible); }
+function mmss(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60), r=s%60; return (m<10?'0':'')+m+':'+(r<10?'0':'')+r; }
+
+/* ---------- stockage protégé (navigation privée) ---------- */
+var store = (function(){
+  var memory = {};
+  var usable = false;
+  try { window.localStorage.setItem('agora.probe','1'); window.localStorage.removeItem('agora.probe'); usable = true; } catch(e){ usable = false; }
+  return {
+    usable: usable,
+    read: function(){
+      try { var raw = usable ? window.localStorage.getItem(STORE_KEY) : memory[STORE_KEY]; return raw ? JSON.parse(raw) : null; }
+      catch(e){ return null; }
+    },
+    write: function(obj){
+      try { var raw = JSON.stringify(obj); if(usable) window.localStorage.setItem(STORE_KEY,raw); else memory[STORE_KEY]=raw; return true; }
+      catch(e){ return false; }
+    }
+  };
+})();
+
+var DEFAULT_STATE = {
+  version: 1,
+  prenom: 'Pierre',
+  createdAt: null,
+  priority: 'Répondre directement à la question avant de développer.',
+  sessions: [],
+  seenImages: []
+};
+
+var state = (function(){
+  var s = store.read();
+  if(!s || typeof s !== 'object') s = null;
+  var base = JSON.parse(JSON.stringify(DEFAULT_STATE));
+  if(s){ for(var k in base){ if(Object.prototype.hasOwnProperty.call(s,k)) base[k]=s[k]; } }
+  if(!base.createdAt) base.createdAt = new Date().toISOString();
+  if(!Array.isArray(base.sessions)) base.sessions = [];
+  if(!Array.isArray(base.seenImages)) base.seenImages = [];
+  return base;
+})();
+function save(){ store.write(state); }
+
+/* ============================================================
+   BIBLIOTHÈQUE D'IMAGES
+   Contrat de données figé. `fichier` = chemin relatif dans
+   assets/images/ ; null tant que le visuel n'est pas fourni.
+   Les métadonnées doivent être revérifiées avant tout usage.
+   ============================================================ */
+var IMAGES = [
+  { id:'img-001', fichier:null, nature:'peinture', periode:'XIXe', difficulte:3,
+    titre:'La Liberté guidant le peuple', auteur:'Eugène Delacroix', date:'1830',
+    source:'Musée du Louvre, Paris', droits:'Domaine public (œuvre) — reproduction à vérifier',
+    legende:'Huile sur toile commémorant les journées de juillet 1830.',
+    themes:['pouvoir','révolution','allégorie'] },
+
+  { id:'img-002', fichier:null, nature:'photographie', periode:'XXe', difficulte:2,
+    titre:'Migrant Mother', auteur:'Dorothea Lange', date:'1936',
+    source:'Farm Security Administration — Library of Congress',
+    droits:'Domaine public (commande fédérale américaine)',
+    legende:'Portrait réalisé dans un camp de cueilleurs de pois, Nipomo, Californie.',
+    themes:['pauvreté','travail','crise'] },
+
+  { id:'img-003', fichier:null, nature:'caricature', periode:'XIXe', difficulte:4,
+    titre:'Le Ventre législatif', auteur:'Honoré Daumier', date:'1834',
+    source:'Lithographie publiée dans L’Association mensuelle',
+    droits:'Domaine public',
+    legende:'Représentation satirique des députés de la Monarchie de Juillet.',
+    themes:['pouvoir','satire','représentation politique'] },
+
+  { id:'img-004', fichier:null, nature:'peinture', periode:'XIXe', difficulte:4,
+    titre:'Le Radeau de la Méduse', auteur:'Théodore Géricault', date:'1819',
+    source:'Musée du Louvre, Paris', droits:'Domaine public (œuvre) — reproduction à vérifier',
+    legende:'Scène inspirée du naufrage de la frégate La Méduse en 1816.',
+    themes:['catastrophe','responsabilité','scandale d’État'] },
+
+  { id:'img-005', fichier:null, nature:'une de presse', periode:'XXe', difficulte:3,
+    titre:'Une du Petit Journal — supplément illustré', auteur:'Anonyme', date:'vers 1900',
+    source:'Bibliothèque nationale de France / Gallica',
+    droits:'Domaine public — vérifier la notice Gallica',
+    legende:'Gravure de couverture d’un supplément illustré à grand tirage.',
+    themes:['information','sensationnalisme','opinion publique'] },
+
+  { id:'img-006', fichier:null, nature:'affiche', periode:'XXe', difficulte:3,
+    titre:'Affiche d’emprunt national', auteur:'Anonyme', date:'1914-1918',
+    source:'Collections publiques françaises',
+    droits:'Domaine public — vérifier l’auteur avant publication',
+    legende:'Affiche de mobilisation financière pendant la Première Guerre mondiale.',
+    themes:['propagande','guerre','persuasion'] },
+
+  { id:'img-007', fichier:null, nature:'photographie', periode:'XXe', difficulte:3,
+    titre:'Chantier urbain', auteur:'Photographe non identifié', date:'années 1960',
+    source:'Archives municipales — à préciser',
+    droits:'À vérifier avant tout usage',
+    legende:'Construction d’un grand ensemble en périphérie urbaine.',
+    themes:['urbanisme','modernisation','logement'] },
+
+  { id:'img-008', fichier:null, nature:'dessin', periode:'XXe', difficulte:4,
+    titre:'Étude de foule', auteur:'Théophile-Alexandre Steinlen', date:'vers 1900',
+    source:'Collections publiques', droits:'Domaine public',
+    legende:'Dessin représentant un rassemblement populaire.',
+    themes:['travail','mouvement social','représentation du peuple'] }
+];
+
+/* Appariement : natures différentes, périodes si possible différentes,
+   difficultés proches (écart <= 1). */
+function buildPair(){
+  var pool = IMAGES.slice();
+  var unseen = pool.filter(function(i){ return state.seenImages.indexOf(i.id) < 0; });
+  if(unseen.length < 2) unseen = pool.slice();
+  var a = unseen[Math.floor(Math.random()*unseen.length)];
+  var candidats = unseen.filter(function(i){
+    return i.id !== a.id && i.nature !== a.nature && Math.abs(i.difficulte - a.difficulte) <= 1;
+  });
+  if(!candidats.length) candidats = pool.filter(function(i){ return i.id !== a.id; });
+  var b = candidats[Math.floor(Math.random()*candidats.length)];
+  return [a,b];
 }
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+var CULTURE_QUESTIONS = [
+  'Une démocratie doit-elle tout tolérer ?',
+  'Faut-il limiter la liberté d’expression en ligne ?',
+  'La croissance économique est-elle compatible avec la transition écologique ?',
+  'L’école peut-elle réduire les inégalités ?',
+  'L’Europe est-elle une puissance ?',
+  'Faut-il craindre l’intelligence artificielle au travail ?',
+  'Le vote doit-il rester facultatif ?',
+  'Les villes doivent-elles réduire la place de la voiture ?',
+  'L’information gratuite est-elle une bonne nouvelle ?',
+  'Peut-on juger le passé avec les valeurs du présent ?'
+];
 
-const jury={
-  phase:'presentation',
-  turn:0,
-  source:'oral',
-  selectedImage:null,
-  history:[],
-  currentQuestion:'',
-  listening:false,
-  speaking:false,
-  started:false,
-  finalTranscript:''
-};
+/* ============================================================
+   HORLOGE — mécanisme unique. Aucun autre décompte dans l'app.
+   ============================================================ */
+var clock = { id:null, endsAt:0, onTick:null, onEnd:null };
+function clockStop(){
+  if(clock.id){ try { clearInterval(clock.id); } catch(e){} }
+  clock.id = null; clock.onTick = null; clock.onEnd = null;
+}
+function clockStart(seconds, onTick, onEnd){
+  clockStop();
+  clock.endsAt = Date.now() + seconds*1000;
+  clock.onTick = onTick; clock.onEnd = onEnd;
+  if(typeof onTick === 'function') onTick(seconds);
+  clock.id = setInterval(function(){
+    var left = (clock.endsAt - Date.now())/1000;
+    if(typeof clock.onTick === 'function') clock.onTick(Math.max(0,left));
+    if(left <= 0){ var end = clock.onEnd; clockStop(); if(typeof end === 'function') end(); }
+  }, 250);
+}
 
-const phaseData={
-  presentation:{label:'ORAL BLANC · PRÉSENTATION',timer:'02:00 · présentation'},
-  image:{label:'ORAL BLANC · ANALYSE D’IMAGE',timer:'10:00 · analyse d’image'},
-  motivation:{label:'ORAL BLANC · MOTIVATIONS',timer:'10:00 · motivations'}
-};
-
-function normalize(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
-function words(s){return s.trim()?s.trim().split(/\s+/).length:0}
-function hasAny(t,a){return a.some(k=>t.includes(k))}
-function countAny(t,a){return a.reduce((n,k)=>n+(t.includes(k)?1:0),0)}
+/* ============================================================
+   ANALYSE DE SURFACE (heuristiques du prototype)
+   ============================================================ */
+function normalize(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+function words(s){ s=String(s||'').trim(); return s ? s.split(/\s+/).length : 0; }
+function hasAny(t,a){ for(var i=0;i<a.length;i++){ if(t.indexOf(a[i])>=0) return true; } return false; }
+function countAny(t,a){ var n=0; for(var i=0;i<a.length;i++){ if(t.indexOf(a[i])>=0) n++; } return n; }
 
 function analyzeAnswer(raw){
-  const t=normalize(raw);
+  var t = normalize(raw);
   return {
-    wc:words(raw),
-    hasNuance:hasAny(t,['mais','cependant','toutefois','neanmoins','en revanche','limite','nuancer']),
-    hasExample:hasAny(t,['par exemple','notamment','lorsque','pendant','dans mon','j ai','j’ai']),
-    hasReason:hasAny(t,['parce que','car ','donc','cela permet','c est pourquoi','en raison']),
-    mentionsScPo:hasAny(t,['sciences po','science po','college universitaire','bachelor','campus','parcoursup']),
-    mentionsIntl:hasAny(t,['international','geopolit','relations internationales','europe','etranger','monde']),
-    mentionsEngagement:hasAny(t,['association','engagement','benevol','projet','club','equipe','responsab']),
-    hasStance:hasAny(t,['je pense','je crois','selon moi','il faut','on doit','je considere','je defends']),
-    observationScore:countAny(t,['je vois','on voit','au premier plan','arriere plan','couleur','personne','visage','objet','cadre','composition','lumiere']),
-    interpretationScore:countAny(t,['symbol','represente','montre que','denonce','signifie','evoque','message']),
-    saysDontKnow:hasAny(t,['je ne sais pas','aucune idee','je l ignore'])
+    wc: words(raw),
+    hasNuance: hasAny(t,['mais','cependant','toutefois','neanmoins','en revanche','limite','nuancer','pourtant']),
+    hasExample: hasAny(t,['par exemple','notamment','lorsque','pendant','dans mon','j ai','quand j']),
+    hasReason: hasAny(t,['parce que','car ','donc','cela permet','c est pourquoi','en raison','puisque']),
+    mentionsScPo: hasAny(t,['sciences po','science po','college universitaire','bachelor','campus','parcoursup']),
+    mentionsIntl: hasAny(t,['relations internationales','geopolit','diplomatie','union europeenne']),
+    mentionsEngagement: hasAny(t,['association','engagement','benevol','club','equipe','responsab','delegue']),
+    hasStance: hasAny(t,['je pense','je crois','selon moi','il faut','on doit','je considere','je defends']),
+    observationScore: countAny(t,['je vois','on voit','au premier plan','arriere plan','couleur','personnage','visage','objet','cadre','composition','lumiere','a droite','a gauche']),
+    interpretationScore: countAny(t,['symbol','represente','montre que','denonce','signifie','evoque','message']),
+    saysDontKnow: hasAny(t,['je ne sais pas','aucune idee','je l ignore'])
   };
 }
 
+/* Extrait une accroche et la cite entre guillemets : formulation
+   grammaticalement sûre quel que soit le fragment capté. */
 function extractHook(raw){
-  const clean=raw.replace(/\s+/g,' ').trim();
-  const rs=[
-    /(?:je suis|je m['’]intéresse|je m interesse|je souhaite|je veux|j['’]aime|je pratique|je participe à|je participe a)\s+([^.!?]{8,90})/i,
-    /(?:par exemple|notamment)\s+([^.!?]{8,90})/i
+  var clean = String(raw||'').replace(/\s+/g,' ').trim();
+  var rs = [
+    /(?:je m['’]int[ée]resse (?:à|a)|je souhaite|je veux|j['’]aime|je pratique)\s+([^.!?,;]{8,70})/i,
+    /(?:par exemple|notamment)\s+([^.!?,;]{8,70})/i
   ];
-  for(const r of rs){const m=clean.match(r);if(m)return m[1].trim().replace(/[,;:]$/,'')}
+  for(var i=0;i<rs.length;i++){ var m = clean.match(rs[i]); if(m) return m[1].trim(); }
   return '';
 }
 
-function chooseFollowUp(raw,a){
-  const hook=extractHook(raw);
+/* ============================================================
+   COUTURE JURY — seule frontière entre orchestrateur et jury.
+   askJury(context) -> Promise<{question, intent, engine}>
+   L'orchestrateur reste déterministe et local.
+   ============================================================ */
+function askJuryRules(ctx){
+  var a = ctx.analysis, hook = extractHook(ctx.answer);
 
-  if(a.saysDontKnow){
-    return {intent:'raisonnement',q:"Vous ne savez pas, ce n’est pas un problème. Qu’est-ce que vous pouvez néanmoins déduire à partir de ce que vous savez ?"};
-  }
-  if(a.wc<16){
-    return {intent:'précision',q:"Votre réponse est très courte. Pouvez-vous préciser votre idée et me donner une raison concrète ?"};
+  if(a.saysDontKnow)
+    return { intent:'raisonnement', question:"Vous ne savez pas, ce n’est pas un problème. Qu’est-ce que vous pouvez néanmoins déduire à partir de ce que vous savez déjà ?" };
+  if(a.wc < 16)
+    return { intent:'précision', question:"Votre réponse est très courte. Pouvez-vous préciser votre idée et donner une raison concrète ?" };
+
+  if(ctx.phase === 'image'){
+    if(a.interpretationScore > a.observationScore && ctx.turn <= 1)
+      return { intent:'observation', question:"Vous interprétez déjà beaucoup. Revenons à l’image : quels éléments précis et directement observables soutiennent cette lecture ?" };
+    if(a.observationScore < 2)
+      return { intent:'observation', question:"Avant d’aller plus loin, décrivez-moi un détail visuel précis que vous n’avez pas encore mentionné." };
+    if(ctx.turn >= 2)
+      return { intent:'contradiction', question:"Proposez maintenant une lecture différente, voire opposée, de cette image. Qu’est-ce qui la rendrait défendable ?" };
+    return { intent:'justification', question:"Quelle est votre interprétation principale, et quel élément visuel la justifie le mieux ?" };
   }
 
-  if(jury.phase==='image'){
-    if(a.interpretationScore>a.observationScore && jury.turn<=1)
-      return {intent:'observation',q:"Vous interprétez déjà beaucoup. Revenons à l’image : quels éléments précis et directement observables soutiennent cette lecture ?"};
-    if(a.observationScore<2)
-      return {intent:'observation',q:"Avant d’aller plus loin, décrivez-moi un détail visuel précis que vous n’avez pas encore mentionné."};
-    if(jury.turn>=2)
-      return {intent:'contradiction',q:"Proposez maintenant une lecture différente, voire opposée, de cette image. Qu’est-ce qui pourrait la rendre défendable ?"};
-    return {intent:'justification',q:"Quelle est votre interprétation principale de cette image, et quel élément visuel la justifie le mieux ?"};
-  }
-
-  if(jury.phase==='presentation'){
+  if(ctx.phase === 'presentation'){
     if(a.mentionsIntl)
-      return {intent:'précision',q:"Vous évoquez les relations internationales. Qu’est-ce qui vous intéresse précisément dans ce domaine, au-delà de son caractère international ?"};
+      return { intent:'précision', question:"Qu’est-ce qui vous intéresse précisément dans ce domaine, au-delà de son caractère international ?" };
     if(a.mentionsEngagement && hook)
-      return {intent:'approfondissement',q:"Vous venez d’évoquer "+hook+". Qu’est-ce que cette expérience a réellement changé dans votre manière de réfléchir ou d’agir ?"};
+      return { intent:'approfondissement', question:"Vous avez parlé de « "+hook+" ». Qu’est-ce que cette expérience a réellement changé dans votre manière de réfléchir ?" };
     if(hook)
-      return {intent:'approfondissement',q:"Vous avez mentionné "+hook+". Pourquoi est-ce important dans votre parcours ?"};
+      return { intent:'approfondissement', question:"Vous avez parlé de « "+hook+" ». Pourquoi est-ce important dans votre parcours ?" };
     if(!a.hasExample)
-      return {intent:'exemple',q:"Vous me donnez plusieurs idées générales. Laquelle pouvez-vous illustrer par une expérience personnelle précise ?"};
-    return {intent:'cohérence',q:"Si vous deviez relier votre parcours à une seule curiosité intellectuelle, laquelle choisiriez-vous et pourquoi ?"};
+      return { intent:'exemple', question:"Vous donnez plusieurs idées générales. Laquelle pouvez-vous illustrer par une expérience personnelle précise ?" };
+    return { intent:'cohérence', question:"Si vous deviez relier votre parcours à une seule curiosité intellectuelle, laquelle choisiriez-vous et pourquoi ?" };
   }
 
-  if(jury.phase==='motivation'){
+  if(ctx.phase === 'motivation'){
     if(a.mentionsScPo && !a.hasReason)
-      return {intent:'justification',q:"Pourquoi précisément Sciences Po, et pas simplement une autre formation exigeante en sciences humaines ?"};
-    if(a.mentionsScPo && jury.turn>=1)
-      return {intent:'contradiction',q:"Beaucoup de candidats pourraient donner cette même raison. Qu’est-ce qui, dans votre réponse, est réellement personnel ?"};
+      return { intent:'justification', question:"Pourquoi précisément Sciences Po, et pas simplement une autre formation exigeante en sciences humaines ?" };
+    if(a.mentionsScPo && ctx.turn >= 1)
+      return { intent:'contradiction', question:"Beaucoup de candidats pourraient donner cette même raison. Qu’est-ce qui, dans votre réponse, est réellement personnel ?" };
     if(a.hasStance && !a.hasNuance)
-      return {intent:'contradiction',q:"Je vais défendre l’idée inverse. Quel est le meilleur argument contre votre propre position ?"};
+      return { intent:'contradiction', question:"Je vais défendre l’idée inverse. Quel est le meilleur argument contre votre propre position ?" };
     if(!a.hasExample)
-      return {intent:'preuve',q:"Donnez-moi un élément concret de votre parcours qui rende cette motivation crédible."};
-    return {intent:'projection',q:"Qu’aimeriez-vous être capable de comprendre ou de faire dans trois ans que vous ne savez pas encore faire aujourd’hui ?"};
+      return { intent:'preuve', question:"Donnez-moi un élément concret de votre parcours qui rende cette motivation crédible." };
+    return { intent:'projection', question:"Qu’aimeriez-vous être capable de comprendre dans trois ans que vous ne savez pas faire aujourd’hui ?" };
   }
 
-  return {intent:'précision',q:"Pouvez-vous préciser ce point ?"};
-}
-
-function setState(name,label){
-  const el=document.getElementById('voiceState');
-  el.className='voiceState'+(name==='listening'?' listening':'');
-  el.querySelector('span').textContent=label;
-}
-
-function setMic(active,label){
-  const b=document.getElementById('micButton');
-  b.classList.toggle('listening',!!active);
-  document.getElementById('micLabel').textContent=label;
-}
-
-function setPhase(phase,q){
-  jury.phase=phase;
-  jury.turn=0;
-  jury.currentQuestion=q;
-  document.getElementById('oralPhase').textContent=phaseData[phase].label;
-  document.getElementById('timer').textContent=phaseData[phase].timer;
-  document.getElementById('q').textContent=q;
-  document.getElementById('p1').classList.toggle('on',phase==='presentation');
-  document.getElementById('p2').classList.toggle('on',phase==='image');
-  document.getElementById('p3').classList.toggle('on',phase==='motivation');
-}
-
-function pickFrenchVoice(){
-  const voices=speechSynthesis.getVoices();
-  return voices.find(v=>/^fr[-_]/i.test(v.lang)&&/Thomas|Daniel|Remy|Nicolas|French/i.test(v.name))
-      || voices.find(v=>/^fr[-_]/i.test(v.lang))
-      || null;
-}
-
-function speak(text,thenReady=true){
-  if(!('speechSynthesis' in window)){
-    setState('ready','à toi');
-    setMic(false,'APPUYER POUR PARLER');
-    return;
+  if(ctx.phase === 'culture'){
+    if(!a.hasStance)
+      return { intent:'position', question:"Je n’ai pas encore entendu votre position. En une phrase : que défendez-vous ?" };
+    if(!a.hasExample)
+      return { intent:'exemple', question:"Un exemple précis, historique ou actuel, qui soutient votre position ?" };
+    if(!a.hasNuance)
+      return { intent:'contradiction', question:"Quelle est la limite la plus sérieuse de ce que vous venez de défendre ?" };
+    return { intent:'synthèse', question:"Reformulez votre position en trente secondes, en tenant compte de l’objection." };
   }
-  speechSynthesis.cancel();
-  jury.speaking=true;
-  setState('speaking','le jury parle');
-  setMic(false,'ÉCOUTE LE JURY');
 
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='fr-FR';
-  u.rate=.96;
-  u.pitch=.94;
-  const voice=pickFrenchVoice();
-  if(voice) u.voice=voice;
-  u.onend=()=>{
-    jury.speaking=false;
-    if(thenReady){
-      setState('ready','à toi');
-      setMic(false,'APPUYER POUR PARLER');
-      document.getElementById('voiceHint').textContent='Réponds naturellement. Appuie sur le bouton, parle, puis AGORA détectera la fin de ta réponse.';
+  return { intent:'précision', question:"Pouvez-vous préciser ce point ?" };
+}
+
+/* Implémentation modèle — non branchée dans ce lot.
+   Elle recevra exactement le même `ctx` et devra rendre la même forme. */
+function askJuryModel(ctx){
+  return Promise.reject(new Error('moteur modèle non configuré'));
+}
+
+function askJury(ctx){
+  if(JURY_ENGINE === 'model'){
+    return askJuryModel(ctx).then(function(r){
+      r.engine = 'model'; return r;
+    }).catch(function(){
+      var r = askJuryRules(ctx); r.engine = 'rules-fallback'; return r;
+    });
+  }
+  var r = askJuryRules(ctx); r.engine = 'rules';
+  return Promise.resolve(r);
+}
+
+/* ============================================================
+   ORCHESTRATEUR — déterministe, local, seul maître des phases.
+   ============================================================ */
+var PHASES = {
+  presentation: { label:'PRÉSENTATION', seconds:120, maxTurns:3 },
+  image:        { label:'ANALYSE D’IMAGE', seconds:600, maxTurns:5 },
+  motivation:   { label:'MOTIVATIONS & PROJET', seconds:720, maxTurns:5 },
+  culture:      { label:'CULTURE & IDÉES', seconds:180, maxTurns:4 }
+};
+var FLOWS = {
+  oral:   ['presentation','image','motivation'],
+  image:  ['image'],
+  culture:['culture'],
+  replay: ['motivation']
+};
+
+var session = null;
+var voice = { listening:false, speaking:false, finalTranscript:'' };
+
+function newSession(kind){
+  return {
+    kind: kind, flow: FLOWS[kind] || FLOWS.oral, flowIndex: 0,
+    phase: (FLOWS[kind] || FLOWS.oral)[0], turn: 0,
+    startedAt: Date.now(), phaseExpired: false,
+    image: null, pair: null, currentQuestion: '', turns: [],
+    promptVersion: PROMPT_VERSION, engine: JURY_ENGINE
+  };
+}
+
+function phaseLabel(){
+  var head = session.kind === 'oral' ? 'ORAL BLANC · ' : '';
+  return head + (PHASES[session.phase] ? PHASES[session.phase].label : '');
+}
+
+function updateProgressDots(){
+  var e1=$('p1'), e2=$('p2'), e3=$('p3');
+  if(e1) e1.classList.toggle('on', session.phase==='presentation'||session.kind!=='oral');
+  if(e2) e2.classList.toggle('on', session.phase==='image');
+  if(e3) e3.classList.toggle('on', session.phase==='motivation');
+}
+
+function renderPhaseTimer(left){
+  var e = $('timer');
+  if(!e) return;
+  var lab = PHASES[session.phase] ? PHASES[session.phase].label.toLowerCase() : '';
+  e.textContent = mmss(left) + ' · ' + lab;
+  e.classList.toggle('urgent', left <= 20);
+}
+
+function startPhaseClock(){
+  var conf = PHASES[session.phase];
+  if(!conf) return;
+  session.phaseExpired = false;
+  clockStart(conf.seconds, renderPhaseTimer, function(){
+    session.phaseExpired = true;
+    var e = $('timer');
+    if(e) e.textContent = 'temps écoulé · ' + PHASES[session.phase].label.toLowerCase();
+  });
+}
+
+function enterPhase(phase, question){
+  session.phase = phase;
+  session.turn = 0;
+  session.currentQuestion = question;
+  setText('oralPhase', phaseLabel());
+  setText('q', question);
+  updateProgressDots();
+  showOralVisual(session.phase === 'image' && session.image);
+  startPhaseClock();
+  speak(question);
+}
+
+function advancePhase(){
+  session.flowIndex++;
+  if(session.flowIndex >= session.flow.length){ finishSession(); return; }
+  var next = session.flow[session.flowIndex];
+  if(next === 'image'){
+    if(!session.image) session.image = buildPair()[0];
+    enterPhase('image', "Passons à l’image. Décrivez-la le plus précisément possible, sans l’interpréter.");
+  } else if(next === 'motivation'){
+    enterPhase('motivation', "Nous allons parler de vos motivations. Pourquoi souhaitez-vous intégrer Sciences Po ?");
+  } else {
+    enterPhase(next, "Poursuivons.");
+  }
+}
+
+function processAnswer(raw){
+  var analysis = analyzeAnswer(raw);
+  var conf = PHASES[session.phase] || { maxTurns:3 };
+  var ctx = {
+    phase: session.phase, turn: session.turn, answer: raw, analysis: analysis,
+    question: session.currentQuestion, elapsed: Math.round((Date.now()-session.startedAt)/1000),
+    image: session.image ? { titre: session.image.titre, nature: session.image.nature } : null
+  };
+
+  askJury(ctx).then(function(next){
+    session.turns.push({
+      phase: session.phase, question: session.currentQuestion, answer: raw,
+      analysis: analysis, intent: next.intent, engine: next.engine, at: Date.now()
+    });
+    session.turn++;
+
+    var doitChanger = session.phaseExpired || session.turn >= conf.maxTurns;
+    clearTranscript();
+
+    if(doitChanger){
+      var last = session.flowIndex >= session.flow.length - 1;
+      if(last){ finishSession(); return; }
+      advancePhase();
+      return;
     }
-  };
-  u.onerror=()=>{
-    jury.speaking=false;
-    setState('ready','à toi');
-    setMic(false,'APPUYER POUR PARLER');
-  };
-  speechSynthesis.speak(u);
+
+    session.currentQuestion = next.question;
+    setText('q', next.question);
+    setText('voiceHint', 'Relance choisie : ' + next.intent + '.');
+    speak(next.question);
+  });
 }
 
-function startStandardOral(){
-  jury.source='oral';
-  jury.selectedImage=null;
-  jury.history=[];
-  jury.started=true;
-  document.getElementById('liveTranscript').className='transcript voiceTranscript empty';
-  document.getElementById('liveTranscript').textContent='';
-  document.getElementById('voiceError').className='voiceError';
-  setPhase('presentation',"Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.");
-  show('oral');
-  setTimeout(()=>speak(jury.currentQuestion),250);
+/* ============================================================
+   ÉVALUATION DE SÉANCE (signaux de surface)
+   ============================================================ */
+var DIMENSIONS = [
+  { key:'concision',     label:'Concision' },
+  { key:'argumentation', label:'Argumentation' },
+  { key:'nuance',        label:'Nuance' },
+  { key:'illustration',  label:'Exemples' },
+  { key:'observation',   label:'Observation' }
+];
+
+function scoreSession(turns){
+  var n = turns.length;
+  var out = { concision:null, argumentation:null, nuance:null, illustration:null, observation:null, samples:n };
+  if(!n) return out;
+  var sumWc=0, reason=0, nuance=0, example=0, obsTurns=0, obsScore=0;
+  for(var i=0;i<n;i++){
+    var a = turns[i].analysis;
+    sumWc += a.wc;
+    if(a.hasReason) reason++;
+    if(a.hasNuance) nuance++;
+    if(a.hasExample) example++;
+    if(turns[i].phase === 'image'){ obsTurns++; obsScore += Math.min(4,a.observationScore); }
+  }
+  var avg = sumWc/n;
+  /* bande utile : 45 à 110 mots. Hors bande, le score décroît. */
+  var band = avg < 45 ? avg/45 : (avg > 110 ? Math.max(0, 1 - (avg-110)/140) : 1);
+  out.concision     = Math.round(band*100);
+  out.argumentation = Math.round((reason/n)*100);
+  out.nuance        = Math.round((nuance/n)*100);
+  out.illustration  = Math.round((example/n)*100);
+  out.observation   = obsTurns ? Math.round((obsScore/obsTurns/4)*100) : null;
+  out.avgWords      = Math.round(avg);
+  return out;
 }
 
-function startImageOral(){
-  const selected=document.querySelector('.imageExperience .imageCard.selected');
-  if(!selected){
-    document.getElementById('imgPrompt').innerHTML='<b>Choisis d’abord une image</b>Le jury doit savoir quelle image tu souhaites analyser.<div class="prepRow"><span>Sélection nécessaire</span><strong>—</strong></div><button class="btn" disabled>COMMENCER L’ANALYSE</button>';
+function overallScore(sc){
+  var vals=[], keys=['concision','argumentation','nuance','illustration','observation'];
+  for(var i=0;i<keys.length;i++){ var v=sc[keys[i]]; if(v!==null && v!==undefined) vals.push(v); }
+  if(!vals.length) return null;
+  var s=0; for(var j=0;j<vals.length;j++) s+=vals[j];
+  return Math.round(s/vals.length);
+}
+
+function pickPriority(sc){
+  var worst=null, key=null;
+  var map = {
+    illustration:'Faire apparaître un exemple précis dans les trente premières secondes.',
+    argumentation:'Justifier chaque affirmation par une raison explicite.',
+    nuance:'Formuler la limite de sa propre position avant que le jury la trouve.',
+    concision:'Donner l’idée essentielle d’abord, développer ensuite.',
+    observation:'Décrire factuellement l’image avant toute interprétation.'
+  };
+  for(var k in map){
+    var v = sc[k];
+    if(v === null || v === undefined) continue;
+    if(worst === null || v < worst){ worst = v; key = k; }
+  }
+  return key ? { key:key, text:map[key], value:worst } : null;
+}
+
+/* ============================================================
+   DÉBRIEF — branché sur la séance réelle
+   ============================================================ */
+function buildDebrief(sess){
+  var turns = sess.turns, sc = scoreSession(turns);
+  var dureeMin = Math.max(1, Math.round((Date.now()-sess.startedAt)/60000));
+
+  setText('debriefMeta', 'DÉBRIEF · ' + turns.length + ' réponse' + (turns.length>1?'s':'') + ' · ' + dureeMin + ' min');
+
+  if(!turns.length){
+    setText('debriefTitle', 'Séance interrompue avant la première réponse.');
+    setText('debriefTag', 'aucune donnée');
+    setText('debriefStrength', 'Rien à analyser pour cette séance.');
+    setText('debriefStrength2', '');
+    setText('debriefImprove', 'Relance une séance et réponds au moins une fois pour obtenir un débrief.');
+    setText('debriefReplayQ', '—');
+    setHTML('debriefDims', '');
     return;
   }
-  jury.source='image';
-  jury.selectedImage=selected.id==='imgA'?'A':'B';
-  jury.history=[];
-  jury.started=true;
-  const q="Vous avez choisi l’image "+jury.selectedImage+". Commencez par la décrire le plus précisément possible, sans l’interpréter.";
-  setPhase('image',q);
-  show('oral');
-  setTimeout(()=>speak(q),250);
+
+  var prio = pickPriority(sc);
+  var forces = [];
+  if(sc.argumentation >= 50) forces.push('Tu justifies tes réponses au lieu de simplement affirmer (' + sc.argumentation + '% des tours).');
+  if(sc.illustration >= 50) forces.push('Tu mobilises des éléments concrets, ce qui rend tes réponses crédibles (' + sc.illustration + '% des tours).');
+  if(sc.nuance >= 45) forces.push('Tu introduis une limite ou une réserve sans abandonner ta position (' + sc.nuance + '% des tours).');
+  if(sc.observation !== null && sc.observation >= 55) forces.push('Ton analyse d’image reste ancrée dans des éléments visibles.');
+  if(sc.concision >= 70) forces.push('Tes réponses tiennent dans une durée utile (' + sc.avgWords + ' mots en moyenne).');
+  if(!forces.length) forces.push('Tu as tenu l’échange sur ' + turns.length + ' tours sans décrocher.');
+
+  setText('debriefTitle', prio ? titreDepuisPriorite(prio.key) : 'Séance exploitable.');
+  setText('debriefTag', prio ? 'priorité : ' + prio.key : 'priorité : à définir');
+  setText('debriefStrength', forces[0]);
+  setText('debriefStrength2', forces[1] || '');
+  setText('debriefImprove', prio ? prio.text : 'Poursuis sur le même rythme.');
+
+  /* moment à rejouer : le tour au score le plus faible sur la priorité */
+  var replay = turns[0];
+  for(var i=0;i<turns.length;i++){
+    var a = turns[i].analysis;
+    var faible = (prio && prio.key==='illustration' && !a.hasExample)
+      || (prio && prio.key==='argumentation' && !a.hasReason)
+      || (prio && prio.key==='nuance' && !a.hasNuance)
+      || (prio && prio.key==='concision' && a.wc > 140);
+    if(faible){ replay = turns[i]; break; }
+  }
+  setText('debriefReplayQ', '« ' + replay.question + ' »');
+  session_replayQuestion = replay.question;
+  session_replayPhase = replay.phase;
+  session_replayImage = sess.image;
+
+  var html = '';
+  for(var d=0; d<DIMENSIONS.length; d++){
+    var v = sc[DIMENSIONS[d].key];
+    html += '<li class="dimRow"><span>' + DIMENSIONS[d].label + '</span><b>' + (v===null||v===undefined ? 'non mesuré' : v + ' / 100') + '</b></li>';
+  }
+  setHTML('debriefDims', html);
+}
+
+function titreDepuisPriorite(key){
+  var m = {
+    illustration:'Ton raisonnement tient, mais il manque de preuves concrètes.',
+    argumentation:'Tu affirmes plus souvent que tu ne justifies.',
+    nuance:'Tes positions sont nettes, mais tu en défends rarement les limites.',
+    concision:'Tu as de la matière, mais tu démarres trop loin de la question.',
+    observation:'Tu interprètes avant d’avoir suffisamment décrit.'
+  };
+  return m[key] || 'Séance exploitable.';
+}
+
+var session_replayQuestion = '';
+var session_replayPhase = 'motivation';
+var session_replayImage = null;
+
+/* ============================================================
+   FIN DE SÉANCE + PERSISTANCE
+   ============================================================ */
+function finishSession(){
+  clockStop();
+  stopVoice();
+  if(!session) { showScreen('home'); return; }
+
+  var sc = scoreSession(session.turns);
+  var record = {
+    id: 'sess-' + session.startedAt,
+    kind: session.kind,
+    date: new Date(session.startedAt).toISOString(),
+    durationSec: Math.round((Date.now()-session.startedAt)/1000),
+    turns: session.turns.length,
+    scores: sc,
+    overall: overallScore(sc),
+    imageId: session.image ? session.image.id : null,
+    promptVersion: session.promptVersion,
+    engine: session.engine,
+    lastQuestion: session.turns.length ? session.turns[session.turns.length-1].question : ''
+  };
+
+  if(session.turns.length){
+    state.sessions.push(record);
+    if(session.image && state.seenImages.indexOf(session.image.id) < 0) state.seenImages.push(session.image.id);
+    var prio = pickPriority(sc);
+    if(prio) state.priority = prio.text;
+    save();
+  }
+
+  buildDebrief(session);
+  renderHome();
+  renderProgress();
+  renderImageStats();
+  showScreen('debrief');
+}
+
+/* ============================================================
+   VOIX
+   ============================================================ */
+var SR = (typeof window !== 'undefined') ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
+var recognition = null;
+try { if(SR) recognition = new SR(); } catch(e){ recognition = null; }
+
+var frenchVoice = null;
+function loadVoices(){
+  try {
+    if(!('speechSynthesis' in window)) return;
+    var vs = window.speechSynthesis.getVoices() || [];
+    frenchVoice = null;
+    for(var i=0;i<vs.length;i++){ if(/^fr[-_]/i.test(vs[i].lang) && /Thomas|Daniel|Nicolas|Remy|French/i.test(vs[i].name)){ frenchVoice = vs[i]; break; } }
+    if(!frenchVoice){ for(var j=0;j<vs.length;j++){ if(/^fr[-_]/i.test(vs[j].lang)){ frenchVoice = vs[j]; break; } } }
+  } catch(e){ frenchVoice = null; }
+}
+try {
+  if('speechSynthesis' in window){
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+} catch(e){}
+
+function setVoiceState(name,label){
+  var el = $('voiceState');
+  if(!el) return;
+  el.className = 'voiceState' + (name==='listening' ? ' listening' : '');
+  var s = el.querySelector('span');
+  if(s) s.textContent = label;
+}
+function setMic(active,label){
+  var b = $('micButton');
+  if(b) b.classList.toggle('listening', !!active);
+  setText('micLabel', label);
+}
+function clearTranscript(){
+  var box = $('liveTranscript');
+  if(box){ box.className = 'transcript voiceTranscript empty'; box.textContent = ''; }
+}
+function readyToSpeak(){
+  setVoiceState('ready','à toi');
+  setMic(false,'APPUYER POUR PARLER');
+}
+
+function speak(text){
+  var ok = false;
+  try { ok = ('speechSynthesis' in window); } catch(e){ ok = false; }
+  if(!ok){ readyToSpeak(); return; }
+  try {
+    window.speechSynthesis.cancel();
+    voice.speaking = true;
+    setVoiceState('speaking','le jury parle');
+    setMic(false,'ÉCOUTE LE JURY');
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR'; u.rate = .96; u.pitch = .94;
+    if(!frenchVoice) loadVoices();
+    if(frenchVoice) u.voice = frenchVoice;
+    u.onend = function(){ voice.speaking = false; readyToSpeak(); };
+    u.onerror = function(){ voice.speaking = false; readyToSpeak(); };
+    window.speechSynthesis.speak(u);
+  } catch(e){ voice.speaking = false; readyToSpeak(); }
+}
+function stopVoice(){
+  try { if('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch(e){}
+  try { if(recognition && voice.listening) recognition.stop(); } catch(e){}
+  voice.listening = false; voice.speaking = false;
 }
 
 function toggleListening(){
-  if(!jury.started){
-    startStandardOral();
-    return;
-  }
-  if(jury.speaking) return;
-
+  if(!session){ startSession('oral'); return; }
+  if(voice.speaking) return;
   if(!recognition){
-    const e=document.getElementById('voiceError');
-    e.className='voiceError show';
-    e.innerHTML='<b>Reconnaissance vocale non disponible.</b> Ce prototype utilise la reconnaissance vocale du navigateur. Essaie Safari ou Chrome récent et autorise le micro.';
+    var e = $('voiceError');
+    if(e){ e.className = 'voiceError show'; e.innerHTML = '<b>Reconnaissance vocale non disponible.</b> Ce prototype utilise la reconnaissance du navigateur. Essaie Chrome ou Safari récent et autorise le micro.'; }
     return;
   }
-
-  if(jury.listening){
-    recognition.stop();
-    return;
-  }
-
-  jury.finalTranscript='';
-  const box=document.getElementById('liveTranscript');
-  box.className='transcript voiceTranscript';
-  box.textContent='…';
-  try{ recognition.start(); }catch(e){}
+  if(voice.listening){ try { recognition.stop(); } catch(e2){} return; }
+  voice.finalTranscript = '';
+  var box = $('liveTranscript');
+  if(box){ box.className = 'transcript voiceTranscript'; box.textContent = '…'; }
+  try { recognition.start(); } catch(e3){}
 }
 
 if(recognition){
-  recognition.lang='fr-FR';
-  recognition.continuous=true;
-  recognition.interimResults=true;
+  recognition.lang = 'fr-FR';
+  recognition.continuous = true;
+  recognition.interimResults = true;
 
-  recognition.onstart=()=>{
-    jury.listening=true;
-    setState('listening','écoute…');
+  recognition.onstart = function(){
+    voice.listening = true;
+    setVoiceState('listening','écoute…');
     setMic(true,'JE T’ÉCOUTE');
-    document.getElementById('voiceHint').textContent='Parle normalement. Appuie à nouveau si tu veux terminer manuellement.';
+    setText('voiceHint','Parle normalement. Appuie à nouveau pour terminer ta réponse.');
   };
-
-  recognition.onresult=(event)=>{
-    let interim='';
-    let finalText=jury.finalTranscript;
-    for(let i=event.resultIndex;i<event.results.length;i++){
-      const txt=event.results[i][0].transcript;
-      if(event.results[i].isFinal) finalText += ' '+txt;
-      else interim += ' '+txt;
+  recognition.onresult = function(event){
+    var interim = '', finalText = voice.finalTranscript;
+    for(var i = event.resultIndex; i < event.results.length; i++){
+      var txt = event.results[i][0].transcript;
+      if(event.results[i].isFinal) finalText += ' ' + txt; else interim += ' ' + txt;
     }
-    jury.finalTranscript=finalText.trim();
-    const shown=(finalText+' '+interim).trim();
-    const box=document.getElementById('liveTranscript');
-    box.className='transcript voiceTranscript';
-    box.textContent=shown || '…';
+    voice.finalTranscript = finalText.trim();
+    var box = $('liveTranscript');
+    if(box){ box.className = 'transcript voiceTranscript'; box.textContent = (finalText + ' ' + interim).trim() || '…'; }
   };
-
-  recognition.onspeechend=()=>{
-    setTimeout(()=>{ if(jury.listening) recognition.stop(); },650);
+  recognition.onspeechend = function(){
+    setTimeout(function(){ if(voice.listening){ try { recognition.stop(); } catch(e){} } }, 900);
   };
-
-  recognition.onend=()=>{
-    jury.listening=false;
+  recognition.onend = function(){
+    voice.listening = false;
+    if(!session) return;
     setMic(false,'ANALYSE…');
-    setState('thinking','le jury réfléchit');
-
-    const raw=jury.finalTranscript.trim();
-    if(words(raw)<4){
-      setState('ready','à toi');
+    setVoiceState('thinking','le jury réfléchit');
+    var raw = voice.finalTranscript.trim();
+    if(words(raw) < 4){
+      readyToSpeak();
       setMic(false,'REPRENDRE LA RÉPONSE');
-      document.getElementById('voiceHint').textContent='Je n’ai pas suffisamment entendu ta réponse. Réessaie en parlant un peu plus près du micro.';
+      setText('voiceHint','Je n’ai pas suffisamment entendu ta réponse. Réessaie en parlant plus près du micro.');
       return;
     }
-    processSpokenAnswer(raw);
+    processAnswer(raw);
   };
-
-  recognition.onerror=(event)=>{
-    jury.listening=false;
-    setState('ready','micro');
+  recognition.onerror = function(event){
+    voice.listening = false;
+    setVoiceState('ready','micro');
     setMic(false,'RÉESSAYER');
-    const e=document.getElementById('voiceError');
-    e.className='voiceError show';
-    e.innerHTML='<b>Micro :</b> '+(event.error==='not-allowed'?'autorisation refusée. Autorise le micro dans le navigateur.':'la reconnaissance vocale a été interrompue. Réessaie.');
+    var e = $('voiceError');
+    if(e){
+      e.className = 'voiceError show';
+      e.innerHTML = '<b>Micro :</b> ' + (event && event.error === 'not-allowed'
+        ? 'autorisation refusée. Autorise le micro dans le navigateur.'
+        : 'la reconnaissance a été interrompue. Réessaie.');
+    }
   };
 }
 
-function processSpokenAnswer(raw){
-  const a=analyzeAnswer(raw);
-  const next=chooseFollowUp(raw,a);
-  jury.history.push({phase:jury.phase,question:jury.currentQuestion,answer:raw,analysis:a,intent:next.intent,followUp:next.q});
-  jury.turn++;
+/* ============================================================
+   ÉCRANS
+   ============================================================ */
+function showScreen(id){
+  var all = document.querySelectorAll('.screen');
+  for(var i=0;i<all.length;i++) all[i].classList.remove('active');
+  var t = $(id);
+  if(t) t.classList.add('active');
+  try { window.scrollTo({ top:0, behavior:'smooth' }); } catch(e){}
+}
 
-  if(jury.phase==='presentation' && jury.turn>=3){
-    const q="Merci. Nous allons maintenant parler de vos motivations. Pourquoi souhaitez-vous intégrer Sciences Po ?";
-    setPhase('motivation',q);
-    document.getElementById('liveTranscript').className='transcript voiceTranscript empty';
-    speak(q);
+function showOralVisual(visible){
+  showEl('oralVisual', !!visible);
+  showEl('oralVisualCaption', !!visible);
+  if(visible && session && session.image){
+    var v = $('oralVisualImg');
+    if(v) v.className = 'imageVisual ' + (session.image.fichier ? '' : 'placeholderA');
+    if(v && session.image.fichier) v.style.backgroundImage = 'url("assets/images/' + session.image.fichier + '")';
+    setText('oralVisualCaption', session.image.titre + ' — ' + session.image.auteur + ', ' + session.image.date + '. ' + session.image.legende);
+  }
+}
+
+function startSession(kind){
+  clockStop();
+  stopVoice();
+  session = newSession(kind);
+  var e = $('voiceError'); if(e) e.className = 'voiceError';
+  clearTranscript();
+
+  if(kind === 'image'){
+    if(!session.image) session.image = currentPair ? currentPair[selectedIndex] : buildPair()[0];
+    setText('oralPhase', phaseLabel());
+    showScreen('oral');
+    enterPhase('image', "Vous avez choisi « " + session.image.titre + " ». Commencez par la décrire le plus précisément possible, sans l’interpréter.");
     return;
   }
-  if(jury.phase==='motivation' && jury.turn>=3){
-    finishOral();
+  if(kind === 'culture'){
+    setText('oralPhase', phaseLabel());
+    showScreen('oral');
+    enterPhase('culture', currentCultureQuestion || CULTURE_QUESTIONS[0]);
     return;
   }
-  if(jury.phase==='image' && jury.turn>=4){
-    finishOral();
+  if(kind === 'replay'){
+    var ph = PHASES[session_replayPhase] ? session_replayPhase : 'motivation';
+    session.flow = [ph];
+    session.phase = ph;
+    if(ph === 'image') session.image = session_replayImage || buildPair()[0];
+    setText('oralPhase', 'REJEU');
+    showScreen('oral');
+    enterPhase(ph, session_replayQuestion || 'Reprenons votre dernière réponse.');
     return;
   }
-
-  jury.currentQuestion=next.q;
-  document.getElementById('q').textContent=next.q;
-  document.getElementById('liveTranscript').className='transcript voiceTranscript empty';
-  document.getElementById('liveTranscript').textContent='';
-  document.getElementById('voiceHint').textContent='Relance choisie : '+next.intent+'.';
-  setTimeout(()=>speak(next.q),450);
-}
-
-function chooseImage(x){
-  document.querySelectorAll('.imageExperience .imageCard').forEach(el=>el.classList.remove('selected'));
-  document.getElementById('img'+x).classList.add('selected');
-  document.getElementById('imgPrompt').innerHTML='<b>Image '+x+' sélectionnée · avant de parler</b>Commence par décrire précisément ce que tu observes. N’interprète pas encore.<div class="prepRow"><span>Préparation libre</span><strong>01:30</strong></div><button class="btn" onclick="startImageOral()">COMMENCER L’ANALYSE</button>';
-}
-
-function buildDebrief(){
-  const h=jury.history,total=h.length||1;
-  const avg=Math.round(h.reduce((s,x)=>s+x.analysis.wc,0)/total);
-  const ex=h.filter(x=>x.analysis.hasExample).length/total;
-  const nu=h.filter(x=>x.analysis.hasNuance).length/total;
-  const rea=h.filter(x=>x.analysis.hasReason).length/total;
-
-  let title='Ton échange donne déjà plusieurs signaux exploitables.';
-  let strength='Tu as maintenu l’échange et donné au jury de la matière pour rebondir.';
-  let improve='Rendre tes premières phrases plus directes et illustrer plus vite.';
-  let tag='priorité : précision';
-
-  if(rea>=.5) strength='Tu justifies régulièrement tes réponses au lieu de simplement affirmer.';
-  if(ex>=.5) strength='Tu mobilises des éléments concrets, ce qui rend tes réponses plus crédibles.';
-  if(nu>=.45) strength='Tu introduis de la nuance sans perdre complètement ta position.';
-  if(avg>110){improve='Tes réponses sont riches mais trop longues. Donne d’abord l’idée essentielle, puis développe.';tag='priorité : concision'}
-  else if(ex<.34){improve='Tes idées restent trop générales. Fais apparaître plus vite une expérience ou un exemple précis.';tag='priorité : concret'}
-  else if(nu<.2){improve='Travaille davantage les limites et contre-arguments de ta propre position.';tag='priorité : nuance'}
-
-  const dm=document.getElementById('debriefMeta');
-  const dt=document.getElementById('debriefTitle');
-  const ds=document.getElementById('debriefStrength');
-  const di=document.getElementById('debriefImprove');
-  const dtag=document.getElementById('debriefTag');
-  if(dm) dm.textContent='DÉBRIEF · '+h.length+' RÉPONSES ORALES';
-  if(dt) dt.textContent=title;
-  if(ds) ds.textContent=strength;
-  if(di) di.textContent=improve;
-  if(dtag) dtag.textContent=tag;
-}
-
-function finishOral(){
-  try{ if(jury.listening && recognition) recognition.stop(); }catch(e){}
-  if('speechSynthesis' in window) speechSynthesis.cancel();
-  buildDebrief();
-  show('debrief');
-}
-
-function restartOral(){
-  if('speechSynthesis' in window) speechSynthesis.cancel();
-  try{ if(jury.listening && recognition) recognition.stop(); }catch(e){}
-  jury.source==='image' ? startImageOral() : startStandardOral();
+  session.image = buildPair()[0];
+  setText('oralPhase', phaseLabel());
+  showScreen('oral');
+  enterPhase('presentation', "Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.");
 }
 
 function quitOral(){
-  if('speechSynthesis' in window) speechSynthesis.cancel();
-  try{ if(jury.listening && recognition) recognition.stop(); }catch(e){}
-  jury.started=false;
-  show('home');
+  clockStop();
+  stopVoice();
+  session = null;
+  setText('timer','—');
+  showScreen('home');
 }
 
-/* Home oral button becomes voice-first */
-document.querySelectorAll('.tile').forEach(btn=>{
-  if(btn.textContent.includes('Oral blanc')) btn.setAttribute('onclick','startStandardOral()');
-});
+/* ---------- accueil ---------- */
+function computeStreak(){
+  if(!state.sessions.length) return 0;
+  var jours = {};
+  for(var i=0;i<state.sessions.length;i++) jours[state.sessions[i].date.slice(0,10)] = true;
+  var n = 0, d = new Date();
+  for(var k=0;k<400;k++){
+    var key = d.toISOString().slice(0,10);
+    if(jours[key]) n++;
+    else if(k > 0) break;
+    d.setDate(d.getDate()-1);
+  }
+  return n;
+}
+
+function renderHome(){
+  var jours = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  var mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  var now = new Date();
+  setText('dateLabel', jours[now.getDay()] + ' ' + now.getDate() + ' ' + mois[now.getMonth()]);
+
+  var streak = computeStreak();
+  setText('streakLabel', state.sessions.length === 0 ? '1re séance' : (streak > 1 ? streak + ' jours' : state.sessions.length + ' séances'));
+  setText('avatarInitial', (state.prenom || 'P').charAt(0).toUpperCase());
+  setText('priorityText', state.priority);
+
+  /* séance du jour : alternance simple pilotée par la priorité courante */
+  var last = state.sessions.length ? state.sessions[state.sessions.length-1] : null;
+  var suggere = (!last || last.kind === 'image') ? 'oral' : 'image';
+  if(state.sessions.length === 0) suggere = 'image';
+
+  if(suggere === 'image'){
+    setText('todayMeta','Aujourd’hui · 8 min');
+    setText('todayTitle','Voir juste avant d’interpréter.');
+    setText('todayDesc','Deux images. Une lecture. Puis le jury vient tester ton raisonnement.');
+  } else {
+    setText('todayMeta','Aujourd’hui · 10 min');
+    setText('todayTitle','Se présenter, puis tenir la contradiction.');
+    setText('todayDesc','Deux minutes de présentation, puis les motivations. Le jury rebondit sur ce que tu dis.');
+  }
+  var b = $('todayBtn');
+  if(b) b.setAttribute('data-target', suggere);
+}
+
+/* ---------- défi image ---------- */
+var currentPair = null;
+var selectedIndex = -1;
+var currentCultureQuestion = '';
+
+function captionHTML(img){
+  return '<b>' + img.titre + '</b>' + img.auteur + ', ' + img.date + ' — ' + img.nature +
+         '<i>' + img.source + ' · ' + img.droits + '</i>';
+}
+
+function renderPair(){
+  currentPair = buildPair();
+  selectedIndex = -1;
+  var a = currentPair[0], b = currentPair[1];
+  setHTML('imgACaption', captionHTML(a));
+  setHTML('imgBCaption', captionHTML(b));
+  setText('imageDifficulty', 'Niveau ' + a.difficulte + '–' + b.difficulte + ' / 5');
+
+  var va = $('imgAVisual'), vb = $('imgBVisual');
+  if(va){
+    va.className = 'imageVisual' + (a.fichier ? '' : ' placeholderA');
+    if(a.fichier) va.style.backgroundImage = 'url("assets/images/' + a.fichier + '")';
+    var oldA = va.querySelector('.placeholderMark'); if(oldA) va.removeChild(oldA);
+    if(!a.fichier){
+      var ma = document.createElement('span'); ma.className='placeholderMark'; ma.textContent='VISUEL NON FOURNI'; va.appendChild(ma);
+    }
+  }
+  if(vb){
+    vb.className = 'imageVisual' + (b.fichier ? '' : ' placeholderB');
+    if(b.fichier) vb.style.backgroundImage = 'url("assets/images/' + b.fichier + '")';
+    var oldB = vb.querySelector('.placeholderMark'); if(oldB) vb.removeChild(oldB);
+    if(!b.fichier){
+      var mb = document.createElement('span'); mb.className='placeholderMark'; mb.textContent='VISUEL NON FOURNI'; vb.appendChild(mb);
+    }
+  }
+  var ca = $('imgA'), cb = $('imgB');
+  if(ca) ca.classList.remove('selected');
+  if(cb) cb.classList.remove('selected');
+  setText('imgPromptTitle','Avant de parler');
+  setText('imgPromptText','Choisis une image, puis décris précisément ce que tu observes. N’interprète pas encore.');
+  setText('prepLabel','Préparation');
+  setText('prepTimer','01:30');
+  var s = $('imgStart'); if(s) s.disabled = true;
+}
+
+function chooseImage(index){
+  if(!currentPair) renderPair();
+  selectedIndex = index;
+  var ca = $('imgA'), cb = $('imgB');
+  if(ca) ca.classList.toggle('selected', index === 0);
+  if(cb) cb.classList.toggle('selected', index === 1);
+  var img = currentPair[index];
+  setText('imgPromptTitle','Image sélectionnée · avant de parler');
+  setText('imgPromptText','« ' + img.titre + ' ». Lis la légende, puis décris précisément ce que tu observes. N’interprète pas encore.');
+  var s = $('imgStart'); if(s) s.disabled = false;
+
+  clockStart(90, function(left){
+    setText('prepTimer', mmss(left));
+  }, function(){
+    setText('prepTimer','00:00');
+    setText('prepLabel','Préparation terminée');
+  });
+}
+
+function renderImageStats(){
+  var sessionsImage = state.sessions.filter(function(s){ return s.imageId; });
+  setText('statImages', String(state.seenImages.length));
+  setText('statSessions', String(sessionsImage.length));
+  var obs = [];
+  for(var i=0;i<sessionsImage.length;i++){
+    var v = sessionsImage[i].scores ? sessionsImage[i].scores.observation : null;
+    if(v !== null && v !== undefined) obs.push(v);
+  }
+  if(!obs.length){ setText('statObs','—'); return; }
+  var s=0; for(var j=0;j<obs.length;j++) s+=obs[j];
+  setText('statObs', Math.round(s/obs.length) + '%');
+}
+
+/* ---------- progression ---------- */
+var progressPeriod = 30;
+
+function renderProgress(){
+  var sessions = state.sessions.filter(function(s){ return s.overall !== null && s.overall !== undefined; });
+  var assez = sessions.length >= 3;
+  showEl('progressEmpty', !assez);
+  showEl('progressBody', assez);
+  if(!assez){ setText('progressTitle','Ta trajectoire commence.'); return; }
+
+  var limite = Date.now() - progressPeriod*86400000;
+  var pts = sessions.filter(function(s){ return progressPeriod >= 3650 || new Date(s.date).getTime() >= limite; });
+  if(pts.length < 2) pts = sessions.slice(-6);
+
+  var vals = pts.map(function(s){ return s.overall; });
+  var dernier = vals[vals.length-1], premier = vals[0];
+  setText('trendValue', String(dernier));
+  setText('trendDelta', (dernier - premier >= 0 ? '+' : '') + (dernier - premier) + ' pts');
+  setText('trendCount', pts.length + ' séances');
+  setText('progressTitle', dernier >= premier ? 'Tes signaux progressent.' : 'Tes signaux reculent légèrement.');
+
+  var x0=18, x1=318, y0=32, y1=118;
+  var d = '', area = '';
+  for(var i=0;i<vals.length;i++){
+    var x = vals.length === 1 ? x0 : x0 + (x1-x0)*i/(vals.length-1);
+    var y = y1 - (y1-y0)*(Math.max(0,Math.min(100,vals[i]))/100);
+    d += (i===0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+  }
+  area = d + 'L' + x1 + ' 125 L' + x0 + ' 125 Z';
+  var lineEl = $('trendLine'), areaEl = $('trendArea');
+  if(lineEl) lineEl.setAttribute('d', d.trim());
+  if(areaEl) areaEl.setAttribute('d', area);
+  setText('axisStart', new Date(pts[0].date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));
+  setText('axisEnd', new Date(pts[pts.length-1].date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));
+
+  /* moyennes par dimension sur la période */
+  var html = '';
+  for(var k=0;k<DIMENSIONS.length;k++){
+    var key = DIMENSIONS[k].key, acc=[], v;
+    for(var j=0;j<pts.length;j++){
+      v = pts[j].scores ? pts[j].scores[key] : null;
+      if(v !== null && v !== undefined) acc.push(v);
+    }
+    if(!acc.length) continue;
+    var sum=0; for(var m=0;m<acc.length;m++) sum+=acc[m];
+    var moy = Math.round(sum/acc.length);
+    html += '<div class="sparkCard"><div class="sparkHead"><span>' + DIMENSIONS[k].label + '</span><b>' + moy + '</b></div>' +
+            '<div class="sparkBar"><i style="width:' + moy + '%"></i></div></div>';
+  }
+  setHTML('sparkGrid', html);
+
+  setText('reportRange', new Date(pts[0].date).toLocaleDateString('fr-FR') + ' – ' + new Date(pts[pts.length-1].date).toLocaleDateString('fr-FR'));
+  var moyennes = scoreAverages(pts);
+  var prio = pickPriority(moyennes);
+  setText('reportTitle', prio ? titreDepuisPriorite(prio.key) : 'Signaux stables.');
+  setText('reportText', 'Sur ' + pts.length + ' séances, ta moyenne de longueur de réponse est de ' +
+    (moyennes.avgWords || '—') + ' mots. Les signaux les plus faibles portent sur ' + (prio ? DIMENSIONS.filter(function(d2){return d2.key===prio.key;})[0].label.toLowerCase() : '—') + '.');
+  setText('nextGoalText', state.priority);
+}
+
+function scoreAverages(sessions){
+  var out = { samples: sessions.length, avgWords: null };
+  var keys = ['concision','argumentation','nuance','illustration','observation'];
+  var wc = [];
+  for(var k=0;k<keys.length;k++){
+    var acc = [];
+    for(var i=0;i<sessions.length;i++){
+      var v = sessions[i].scores ? sessions[i].scores[keys[k]] : null;
+      if(v !== null && v !== undefined) acc.push(v);
+    }
+    if(acc.length){ var s=0; for(var j=0;j<acc.length;j++) s+=acc[j]; out[keys[k]] = Math.round(s/acc.length); }
+    else out[keys[k]] = null;
+  }
+  for(var n=0;n<sessions.length;n++){ if(sessions[n].scores && sessions[n].scores.avgWords) wc.push(sessions[n].scores.avgWords); }
+  if(wc.length){ var t=0; for(var p=0;p<wc.length;p++) t+=wc[p]; out.avgWords = Math.round(t/wc.length); }
+  return out;
+}
+
+function setPeriod(days, btnId){
+  progressPeriod = days;
+  var ids = ['period7','period30','periodAll'];
+  for(var i=0;i<ids.length;i++){ var e=$(ids[i]); if(e) e.classList.toggle('active', ids[i]===btnId); }
+  renderProgress();
+}
+
+/* ---------- culture ---------- */
+function renderCulture(){
+  currentCultureQuestion = CULTURE_QUESTIONS[Math.floor(Math.random()*CULTURE_QUESTIONS.length)];
+  setText('cultureQuestion', currentCultureQuestion);
+}
+
+/* ============================================================
+   LIAISONS D'INTERFACE — installées avant tout décoratif
+   ============================================================ */
+function bind(){
+  on('todayBtn', function(){
+    var b = $('todayBtn');
+    var target = b ? b.getAttribute('data-target') : 'image';
+    if(target === 'image'){ renderPair(); showScreen('image'); }
+    else startSession('oral');
+  });
+  on('tileOral', function(){ startSession('oral'); });
+  on('tileImage', function(){ renderPair(); showScreen('image'); });
+  on('tileCulture', function(){ renderCulture(); showScreen('culture'); });
+  on('tileProgress', function(){ renderProgress(); showScreen('progress'); });
+
+  on('oralBack', quitOral);
+  on('oralRestart', function(){ var k = session ? session.kind : 'oral'; startSession(k); });
+  on('oralFinish', finishSession);
+  on('micButton', toggleListening);
+
+  on('imageBack', function(){ clockStop(); showScreen('home'); });
+  on('imgA', function(){ chooseImage(0); });
+  on('imgB', function(){ chooseImage(1); });
+  on('imgStart', function(){ if(selectedIndex >= 0) startSession('image'); });
+
+  on('cultureBack', function(){ clockStop(); showScreen('home'); });
+  on('cultureBtn', function(){ startSession('culture'); });
+
+  on('progressBack', function(){ showScreen('home'); });
+  on('period7', function(){ setPeriod(7,'period7'); });
+  on('period30', function(){ setPeriod(30,'period30'); });
+  on('periodAll', function(){ setPeriod(3650,'periodAll'); });
+
+  on('debriefBack', function(){ showScreen('home'); });
+  on('debriefDone', function(){ showScreen('home'); });
+  on('debriefReplay', function(){ startSession('replay'); });
+}
+
+function init(){
+  bind();
+  renderHome();
+  renderImageStats();
+  renderCulture();
+  renderProgress();
+  if(!store.usable){
+    var e = $('voiceError');
+    if(e){ e.className = 'voiceError show'; e.innerHTML = '<b>Navigation privée détectée.</b> L’historique des séances ne sera pas conservé.'; }
+  }
+}
+
+try { init(); } catch(e){ try { console.error('AGORA init', e); } catch(e2){} }
 </script>
 </body></html>
