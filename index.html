@@ -186,6 +186,8 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .voiceDumpToggle{background:none;border:0;padding:8px 0 0;color:#6f7691;font-size:10px;letter-spacing:.06em;text-decoration:underline;cursor:pointer}
 .voiceDump{margin-top:8px;padding:11px 12px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;line-height:1.65;color:#aab0c6;white-space:pre-wrap;word-break:break-all}
 
+.voiceLinks{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+
 @media(min-width:700px){body{padding:20px}.app{min-height:calc(100vh - 40px);border-radius:34px;background:var(--bg);box-shadow:0 25px 100px rgba(30,34,70,.13)}}
 </style>
 </head>
@@ -257,7 +259,10 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
           <button type="button" id="voiceTest">TESTER</button>
         </div>
         <div class="voiceNote" id="voiceNote"></div>
-        <button type="button" class="voiceDumpToggle" id="voiceDumpToggle">voir les voix détectées</button>
+        <div class="voiceLinks">
+          <button type="button" class="voiceDumpToggle" id="phrasingToggle">phrasé : naturel</button>
+          <button type="button" class="voiceDumpToggle" id="voiceDumpToggle">voir les voix détectées</button>
+        </div>
         <div class="voiceDump hidden" id="voiceDump"></div>
       </div>
     </div>
@@ -426,6 +431,7 @@ var DEFAULT_STATE = {
   createdAt: null,
   priority: 'Répondre directement à la question avant de développer.',
   voiceURI: null,
+  phrasing: 'naturel',
   sessions: [],
   seenImages: []
 };
@@ -1091,6 +1097,17 @@ function loadVoices(){
   renderVoicePicker();
 }
 
+function renderPhrasing(){
+  setText('phrasingToggle', 'phrasé : ' + (state.phrasing === 'continu' ? 'continu' : 'naturel'));
+}
+
+function togglePhrasing(){
+  state.phrasing = (state.phrasing === 'continu') ? 'naturel' : 'continu';
+  save();
+  renderPhrasing();
+  speak('Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.');
+}
+
 function chooseVoice(uri){
   state.voiceURI = uri || null;
   save();
@@ -1126,25 +1143,81 @@ function readyToSpeak(){
   setMic(false,'APPUYER POUR PARLER');
 }
 
+/* Les synthetiseurs compacts rendent nettement mieux trois phrases courtes
+   qu'une longue. On decoupe l'enonce et on marque une pause avant la
+   question, pour imiter le rythme d'un examinateur. */
+var PAUSE_PHRASE = 340;    /* entre deux affirmations */
+var PAUSE_QUESTION = 620;  /* juste avant une question */
+
+function splitSpeech(text){
+  var brut = String(text || '').trim();
+  if(!brut) return [];
+  var morceaux = brut.match(/[^.!?…]+[.!?…]*/g) || [brut];
+  var nets = [];
+  for(var i=0;i<morceaux.length;i++){
+    var m = morceaux[i].trim();
+    if(!m) continue;
+    /* un fragment tres court est recolle au precedent */
+    if(m.length < 6 && nets.length) nets[nets.length-1] += ' ' + m;
+    else nets.push(m);
+  }
+  if(!nets.length) nets = [brut];
+  var out = [];
+  for(var j=0;j<nets.length;j++){
+    var suivant = nets[j+1];
+    var pause = 0;
+    if(suivant) pause = /\?\s*$/.test(suivant) ? PAUSE_QUESTION : PAUSE_PHRASE;
+    out.push({ text: nets[j], pause: pause });
+  }
+  return out;
+}
+
+var speechToken = 0;
+
 function speak(text){
   var ok = false;
   try { ok = ('speechSynthesis' in window); } catch(e){ ok = false; }
   if(!ok){ readyToSpeak(); return; }
+  var segments = (state.phrasing === 'continu')
+    ? [{ text: String(text || ''), pause: 0 }]
+    : splitSpeech(text);
+  if(!segments.length){ readyToSpeak(); return; }
+
+  speechToken++;
+  var token = speechToken;
+  try { window.speechSynthesis.cancel(); } catch(e){}
+  voice.speaking = true;
+  setVoiceState('speaking','le jury parle');
+  setMic(false,'ÉCOUTE LE JURY');
+  if(!frenchVoice && !frenchVoices.length) loadVoices();
+  sayNext(segments, 0, token);
+}
+
+function sayNext(segments, i, token){
+  if(token !== speechToken) return;
+  if(i >= segments.length){ voice.speaking = false; readyToSpeak(); return; }
+
+  var seg = segments[i], fini = false, garde = null;
+  function suivant(){
+    if(fini) return;
+    fini = true;
+    if(garde) clearTimeout(garde);
+    if(token !== speechToken) return;
+    setTimeout(function(){ sayNext(segments, i+1, token); }, seg.pause);
+  }
   try {
-    window.speechSynthesis.cancel();
-    voice.speaking = true;
-    setVoiceState('speaking','le jury parle');
-    setMic(false,'ÉCOUTE LE JURY');
-    var u = new SpeechSynthesisUtterance(text);
+    var u = new SpeechSynthesisUtterance(seg.text);
     u.lang = 'fr-FR'; u.rate = .96; u.pitch = .94;
-    if(!frenchVoice && !frenchVoices.length) loadVoices();
     if(frenchVoice) u.voice = frenchVoice;
-    u.onend = function(){ voice.speaking = false; readyToSpeak(); };
-    u.onerror = function(){ voice.speaking = false; readyToSpeak(); };
+    u.onend = suivant;
+    u.onerror = suivant;
+    /* Safari laisse parfois onend sans le declencher : garde-fou. */
+    garde = setTimeout(suivant, Math.max(4000, seg.text.length * 80 + 2500));
     window.speechSynthesis.speak(u);
-  } catch(e){ voice.speaking = false; readyToSpeak(); }
+  } catch(e){ suivant(); }
 }
 function stopVoice(){
+  speechToken++;
   try { if('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch(e){}
   try { if(recognition && voice.listening) recognition.stop(); } catch(e){}
   voice.listening = false; voice.speaking = false;
@@ -1517,6 +1590,7 @@ function bind(){
   on('micButton', toggleListening);
   on('voiceSelect', function(){ var e=$('voiceSelect'); if(e) chooseVoice(e.value); }, 'change');
   on('voiceTest', function(){ speak('Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.'); setTimeout(loadVoices, 700); });
+  on('phrasingToggle', togglePhrasing);
   on('voiceDumpToggle', function(){
     var e = $('voiceDump');
     if(!e) return;
@@ -1546,6 +1620,7 @@ function bind(){
 
 function init(){
   bind();
+  renderPhrasing();
   renderVoicePicker();
   renderHome();
   renderImageStats();
