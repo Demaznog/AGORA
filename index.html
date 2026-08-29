@@ -383,6 +383,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
     <div class="eyebrow">SIGNAUX DE LA SÉANCE</div>
     <ul class="dimList" id="debriefDims"></ul>
     <p class="note">Signaux de surface mesurés par le moteur local. Ils ne remplacent pas une évaluation du raisonnement.</p>
+    <p class="note hidden" id="debriefEngine"></p>
   </div>
   <button class="btn accent" id="debriefDone">TERMINER</button>
 </section>
@@ -395,8 +396,21 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
    Moteur de jury : local à règles (JURY_ENGINE = 'rules').
    ============================================================ */
 
+/* ---- Relais de jury -------------------------------------------------
+   Laisser RELAY_URL vide tant que le Worker n'est pas déployé :
+   AGORA fonctionne alors sur son moteur local à règles.
+   Renseigner l'adresse bascule automatiquement sur le modèle,
+   avec repli sur les règles en cas d'échec ou de latence excessive.
+   RELAY_TOKEN n'est pas un secret : il est lisible dans la page.
+   Il n'empêche que la découverte fortuite du Worker ; la vraie
+   protection est le filtrage d'origine côté Cloudflare.
+   -------------------------------------------------------------------- */
+var RELAY_URL = '';
+var RELAY_TOKEN = '';
+var RELAY_TIMEOUT = 9000;
+
 var PROMPT_VERSION = 'rules-2026-09';
-var JURY_ENGINE = 'rules';           /* 'rules' | 'model' */
+var JURY_ENGINE = RELAY_URL ? 'model' : 'rules';   /* 'rules' | 'model' */
 var STORE_KEY = 'agora.v1.state';    /* nom définitif, ne jamais renommer */
 
 /* ---------- utilitaires défensifs ---------- */
@@ -654,17 +668,47 @@ function askJuryRules(ctx){
   return { intent:'précision', question:"Pouvez-vous préciser ce point ?" };
 }
 
-/* Implémentation modèle — non branchée dans ce lot.
-   Elle recevra exactement le même `ctx` et devra rendre la même forme. */
+/* Appel du relais. Même `ctx` que les règles, même forme de sortie.
+   Toute erreur, tout dépassement de délai, toute réponse illisible
+   retombe silencieusement sur les règles : une panne réseau ne doit
+   jamais interrompre une séance. */
 function askJuryModel(ctx){
-  return Promise.reject(new Error('moteur modèle non configuré'));
+  if(!RELAY_URL) return Promise.reject(new Error('relais non configuré'));
+  var controleur = null, minuteur = null;
+  try { controleur = new AbortController(); } catch(e){ controleur = null; }
+  if(controleur) minuteur = setTimeout(function(){ try { controleur.abort(); } catch(e){} }, RELAY_TIMEOUT);
+
+  var options = {
+    method: 'POST',
+    headers: { 'content-type':'application/json', 'x-agora-token': RELAY_TOKEN },
+    body: JSON.stringify({ context: ctx })
+  };
+  if(controleur) options.signal = controleur.signal;
+
+  return fetch(RELAY_URL, options).then(function(r){
+    return r.json().then(function(data){
+      if(!r.ok) throw new Error((data && data.error) || ('relais ' + r.status));
+      return data;
+    });
+  }).then(function(data){
+    if(minuteur) clearTimeout(minuteur);
+    var q = String(data && data.question || '').trim();
+    if(q.length < 8) throw new Error('question vide');
+    return { question:q, intent:String(data.intent || 'précision'), latencyMs:data.latencyMs || null };
+  }).catch(function(e){
+    if(minuteur) clearTimeout(minuteur);
+    throw e;
+  });
 }
+
+var dernierRepli = '';
 
 function askJury(ctx){
   if(JURY_ENGINE === 'model'){
     return askJuryModel(ctx).then(function(r){
       r.engine = 'model'; return r;
-    }).catch(function(){
+    }).catch(function(e){
+      dernierRepli = String(e && e.message || e);
       var r = askJuryRules(ctx); r.engine = 'rules-fallback'; return r;
     });
   }
@@ -761,10 +805,19 @@ function advancePhase(){
 function processAnswer(raw){
   var analysis = analyzeAnswer(raw);
   var conf = PHASES[session.phase] || { maxTurns:3 };
+  var posees = [];
+  for(var t=0;t<session.turns.length;t++) posees.push(session.turns[t].question);
   var ctx = {
     phase: session.phase, turn: session.turn, answer: raw, analysis: analysis,
-    question: session.currentQuestion, elapsed: Math.round((Date.now()-session.startedAt)/1000),
-    image: session.image ? { titre: session.image.titre, nature: session.image.nature } : null
+    question: session.currentQuestion,
+    elapsed: Math.round((Date.now()-session.startedAt)/1000),
+    secondsLeft: clock.id ? Math.max(0, Math.round((clock.endsAt - Date.now())/1000)) : 0,
+    previousQuestions: posees,
+    image: (session.phase === 'image' && session.image) ? {
+      titre: session.image.titre, auteur: session.image.auteur, date: session.image.date,
+      nature: session.image.nature, legende: session.image.legende,
+      source: session.image.source, themes: session.image.themes
+    } : null
   };
 
   askJury(ctx).then(function(next){
@@ -908,6 +961,23 @@ function buildDebrief(sess){
     html += '<li class="dimRow"><span>' + DIMENSIONS[d].label + '</span><b>' + (v===null||v===undefined ? 'non mesuré' : v + ' / 100') + '</b></li>';
   }
   setHTML('debriefDims', html);
+
+  /* honnêteté sur le moteur : si le relais a échoué, le dire. */
+  var replis = 0, modele = 0;
+  for(var k=0;k<turns.length;k++){
+    if(turns[k].engine === 'rules-fallback') replis++;
+    if(turns[k].engine === 'model') modele++;
+  }
+  var note = '';
+  if(JURY_ENGINE === 'model' && replis){
+    note = replis + ' relance' + (replis>1?'s':'') + ' sur ' + turns.length +
+           ' produite' + (replis>1?'s':'') + ' par le moteur local : le relais n’a pas répondu' +
+           (dernierRepli ? ' (' + dernierRepli + ')' : '') + '.';
+  } else if(modele === turns.length && modele){
+    note = 'Toutes les relances ont été produites par le jury du relais.';
+  }
+  setText('debriefEngine', note);
+  showEl('debriefEngine', !!note);
 }
 
 function titreDepuisPriorite(key){
@@ -945,6 +1015,7 @@ function finishSession(){
     imageId: session.image ? session.image.id : null,
     promptVersion: session.promptVersion,
     engine: session.engine,
+    fallbacks: session.turns.filter(function(t){ return t.engine === 'rules-fallback'; }).length,
     lastQuestion: session.turns.length ? session.turns[session.turns.length-1].question : ''
   };
 

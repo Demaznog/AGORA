@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d1021">
+<title>AGORA — banc de comparaison</title>
+<style>
+:root{--bg:#f6f7fb;--ink:#121526;--muted:#777c91;--line:#e8eaf2;--accent:#625cff;--dark:#0d1021;--good:#1a9b6f;--warn:#c2410c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:540px;margin:auto;padding:env(safe-area-inset-top) 18px calc(30px + env(safe-area-inset-bottom))}
+.top{height:70px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:17px;font-weight:850;letter-spacing:.16em}.brand span{color:var(--accent)}
+.brand a{color:var(--muted);font-size:12px;font-weight:600;letter-spacing:0;text-decoration:none}
+.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:10px;font-weight:800;color:var(--muted)}
+h1{font-size:31px;line-height:1.08;letter-spacing:-.035em;margin:14px 0 10px;font-weight:770}
+.lead{font-size:14px;line-height:1.55;color:#555b70;margin:0 0 18px}
+.btn{border:0;border-radius:16px;background:var(--dark);color:#fff;padding:15px 18px;width:100%;font-weight:780;font-size:13px;letter-spacing:.04em;cursor:pointer;margin-top:10px}
+.btn.accent{background:linear-gradient(135deg,#6a63ff,#554eff)}
+.btn.ghost{background:#eef0f6;color:var(--ink)}
+.btn[disabled]{opacity:.45}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:850;margin-bottom:6px}
+.field input{width:100%;font:inherit;font-size:13px;padding:13px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink)}
+.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;margin:14px 0;box-shadow:0 10px 34px rgba(34,38,74,.05)}
+.caseHead{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:850}
+.ctx{font-size:13px;line-height:1.55;color:#464d60;margin:12px 0 0}
+.ctx b{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.ctx p{margin:0 0 12px}
+.answer{background:#f7f8fc;border-radius:14px;padding:13px;font-size:12.5px;line-height:1.55;color:#3d4457}
+.opt{width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:20px;padding:17px;margin:11px 0;cursor:pointer;font:inherit}
+.opt:active{transform:scale(.99)}
+.optTag{font-size:10px;letter-spacing:.1em;font-weight:850;color:var(--accent);text-transform:uppercase}
+.optQ{font-size:16px;line-height:1.4;margin-top:8px;font-weight:640;color:var(--ink)}
+.optMeta{font-size:10px;color:var(--muted);margin-top:9px}
+.equal{font-size:12px;color:var(--muted);background:none;border:0;text-decoration:underline;cursor:pointer;padding:10px 0;width:100%}
+.status{font-size:12px;line-height:1.5;color:var(--muted);margin-top:14px}
+.status.err{color:var(--warn)}
+.bar{height:6px;background:#e7e9f1;border-radius:20px;overflow:hidden;margin:16px 0 4px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:20px;transition:width .25s}
+.res{margin:16px 0 0}
+.resRow{display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid var(--line);font-size:13px}
+.resRow b{font-weight:800}
+.hidden{display:none}
+.note{font-size:11px;line-height:1.55;color:#8a90a1;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="brand">AGORA<span>.</span></div><a href="index.html">retour à l’app</a></header>
+
+<section id="setup">
+  <div class="eyebrow">BANC DE COMPARAISON</div>
+  <h1>Quel jury sonne le plus juste ?</h1>
+  <p class="lead">Douze situations d’entretien. Deux relances par situation, produites par deux modèles différents, présentées sans étiquette et dans un ordre tiré au sort. Tu choisis. Le verdict n’apparaît qu’à la fin.</p>
+  <div class="card">
+    <div class="field"><label for="relayUrl">Adresse du relais</label><input id="relayUrl" type="url" placeholder="https://agora-jury.xxx.workers.dev/jury" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div class="field"><label for="relayToken">Jeton</label><input id="relayToken" type="text" placeholder="valeur de AGORA_TOKEN" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <button class="btn accent" id="start">COMMENCER</button>
+    <div class="status" id="setupStatus"></div>
+  </div>
+  <p class="note">Les deux valeurs restent dans ce navigateur. Le jeton n’est pas un secret : il empêche seulement l’usage fortuit du relais par un tiers.</p>
+</section>
+
+<section id="run" class="hidden">
+  <div class="bar"><i id="progressBar" style="width:0%"></i></div>
+  <div class="card">
+    <div class="caseHead"><span id="caseNum">1 / 12</span><span id="casePhase">présentation</span></div>
+    <div class="ctx">
+      <b>Question du jury</b><p id="caseQuestion">—</p>
+      <b>Réponse du candidat</b><div class="answer" id="caseAnswer">—</div>
+    </div>
+  </div>
+  <div id="options" class="hidden">
+    <button class="opt" id="optA"><span class="optTag">Relance 1</span><span class="optQ" id="optAText">—</span><span class="optMeta" id="optAMeta"></span></button>
+    <button class="opt" id="optB"><span class="optTag">Relance 2</span><span class="optQ" id="optBText">—</span><span class="optMeta" id="optBMeta"></span></button>
+    <button class="equal" id="optEqual">les deux se valent, passer</button>
+  </div>
+  <div class="status" id="runStatus">Interrogation des deux modèles…</div>
+  <button class="btn ghost hidden" id="retry">RÉESSAYER CETTE SITUATION</button>
+</section>
+
+<section id="done" class="hidden">
+  <div class="eyebrow">RÉSULTAT</div>
+  <h1 id="verdict">—</h1>
+  <p class="lead" id="verdictDetail">—</p>
+  <div class="card">
+    <div class="res" id="tally"></div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">DÉTAIL DES CHOIX</div>
+    <div class="res" id="detail"></div>
+  </div>
+  <button class="btn ghost" id="restart">RECOMMENCER</button>
+  <p class="note">Le score ne tranche que si l’écart est net. Sur douze situations, un écart de deux ou trois ne veut rien dire : c’est que les deux se valent, et tu peux alors choisir sur la latence.</p>
+</section>
+</div>
+
+<script>
+function $(id){ try { return document.getElementById(id); } catch(e){ return null; } }
+function setText(id,v){ var e=$(id); if(e) e.textContent=v; }
+function setHTML(id,v){ var e=$(id); if(e) e.innerHTML=v; }
+function showEl(id,v){ var e=$(id); if(e) e.classList.toggle('hidden',!v); }
+function on(id,fn){ var e=$(id); if(e) e.addEventListener('click',fn); }
+
+var CAS = [
+  { phase:'presentation',
+    question:"Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.",
+    answer:"Bonjour, je m'appelle Pierre, je suis en terminale au lycée Montaigne à Bordeaux, en spécialités histoire-géographie et sciences économiques. Je m'intéresse beaucoup à la politique internationale et je lis souvent la presse. J'ai aussi fait du théâtre pendant trois ans et je suis délégué de classe depuis la seconde." },
+  { phase:'presentation',
+    question:"Vous dites vous intéresser à la politique internationale. Qu'est-ce qui vous y attire ?",
+    answer:"C'est un domaine qui me passionne parce qu'on y voit vraiment comment les décisions politiques ont un impact concret sur la vie des gens. Et puis c'est très varié, il y a la diplomatie, l'économie, les questions humanitaires. Je trouve ça complet." },
+  { phase:'presentation',
+    question:"Vous avez parlé du théâtre. Qu'est-ce que cette expérience a changé pour vous ?",
+    answer:"Ça m'a beaucoup aidé pour l'oral. Avant j'étais assez timide et là j'ai appris à parler devant un public. Je pense que ça me sert aussi pour les exposés." },
+  { phase:'presentation',
+    question:"Vous êtes délégué depuis la seconde. Racontez-moi une situation où ce rôle a été difficile.",
+    answer:"Il y a eu une histoire l'an dernier avec un professeur, la classe voulait que je porte une réclamation sur les notes. Je n'étais pas d'accord sur le fond, je trouvais que les notes étaient justes, mais j'étais leur représentant. J'ai fini par y aller en disant que je transmettais l'avis de la classe et pas le mien. Certains m'ont reproché de ne pas les avoir défendus assez fort." },
+
+  { phase:'image',
+    question:"Vous avez choisi cette image. Commencez par la décrire le plus précisément possible, sans l'interpréter.",
+    answer:"Cette image dénonce clairement la pauvreté et l'exploitation des travailleurs pendant la crise. On sent la détresse de cette femme, elle symbolise toutes les victimes du système économique de l'époque. C'est une photographie très engagée politiquement.",
+    image:{ titre:"Migrant Mother", auteur:"Dorothea Lange", date:"1936", nature:"photographie",
+            legende:"Portrait réalisé dans un camp de cueilleurs de pois, Nipomo, Californie.",
+            source:"Farm Security Administration — Library of Congress",
+            themes:["pauvreté","travail","crise"] } },
+  { phase:'image',
+    question:"Revenons à l'image. Quels éléments précis et directement observables soutiennent cette lecture ?",
+    answer:"On voit une femme assise au premier plan, la main posée contre son visage, le regard tourné sur le côté. Deux enfants sont appuyés contre elle, de dos, on ne voit pas leurs visages. À l'arrière-plan il y a une toile, sans doute une tente. Ses vêtements sont usés et l'image est en noir et blanc, très resserrée sur le groupe.",
+    image:{ titre:"Migrant Mother", auteur:"Dorothea Lange", date:"1936", nature:"photographie",
+            legende:"Portrait réalisé dans un camp de cueilleurs de pois, Nipomo, Californie.",
+            source:"Farm Security Administration — Library of Congress",
+            themes:["pauvreté","travail","crise"] } },
+  { phase:'image',
+    question:"Quelle est votre interprétation principale, et quel élément visuel la justifie le mieux ?",
+    answer:"Je pense que le photographe veut susciter de l'empathie. Le cadrage serré et le fait que les enfants soient de dos concentrent toute l'attention sur le visage de la mère. On est obligé de la regarder. C'est une composition qui rappelle beaucoup les représentations religieuses de la Vierge à l'enfant, ce qui donne une dimension presque sacrée à la scène.",
+    image:{ titre:"Migrant Mother", auteur:"Dorothea Lange", date:"1936", nature:"photographie",
+            legende:"Portrait réalisé dans un camp de cueilleurs de pois, Nipomo, Californie.",
+            source:"Farm Security Administration — Library of Congress",
+            themes:["pauvreté","travail","crise"] } },
+  { phase:'image',
+    question:"Décrivez-moi cette caricature avant toute interprétation.",
+    answer:"Je ne connais pas du tout cette œuvre, je ne sais pas quoi en dire.",
+    image:{ titre:"Le Ventre législatif", auteur:"Honoré Daumier", date:"1834", nature:"caricature",
+            legende:"Représentation satirique des députés de la Monarchie de Juillet.",
+            source:"Lithographie publiée dans L’Association mensuelle",
+            themes:["pouvoir","satire","représentation politique"] } },
+
+  { phase:'motivation',
+    question:"Pourquoi souhaitez-vous intégrer Sciences Po ?",
+    answer:"Parce que Sciences Po offre une formation pluridisciplinaire qui correspond exactement à mon profil. J'aime l'histoire, l'économie, le droit, et je ne veux pas avoir à choisir dès maintenant. Et puis c'est une école qui ouvre beaucoup de portes, avec un réseau très important et une reconnaissance internationale." },
+  { phase:'motivation',
+    question:"Beaucoup de candidats donneraient cette même réponse. Qu'y a-t-il de réellement personnel dans la vôtre ?",
+    answer:"C'est vrai. Ce qui est personnel, c'est que mon père a travaillé dix ans dans une collectivité territoriale et je l'ai vu se battre pour des dossiers de logement social. J'ai compris que les décisions administratives ne sont pas neutres, qu'elles se négocient. C'est ça que je veux comprendre, pas juste les grandes théories." },
+  { phase:'motivation',
+    question:"Que feriez-vous si votre projet actuel changeait complètement ?",
+    answer:"Franchement je n'y ai pas trop réfléchi. Je pense que de toute façon la formation est assez générale pour permettre de bifurquer. Il y a beaucoup de débouchés." },
+
+  { phase:'culture',
+    question:"Une démocratie doit-elle tout tolérer ?",
+    answer:"Non, il faut des limites, sinon la démocratie se détruit elle-même. On l'a vu historiquement avec la montée des régimes autoritaires dans les années trente. Donc il faut interdire les discours qui appellent à la haine ou à la violence. C'est le principe de la démocratie qui se défend." }
+];
+
+var etat = { i:0, choix:[], url:'', token:'', paire:null };
+
+function relais(provider, cas){
+  var ctx = {
+    phase: cas.phase, turn: 1, answer: cas.answer, question: cas.question,
+    elapsed: 120, secondsLeft: 300, previousQuestions: [cas.question],
+    image: cas.image || null,
+    analysis: {
+      wc: cas.answer.split(/\s+/).length,
+      hasReason: /parce que|car |donc|puisque/i.test(cas.answer),
+      hasExample: /par exemple|notamment|quand j|j'ai /i.test(cas.answer),
+      hasNuance: /mais|cependant|toutefois|en revanche/i.test(cas.answer),
+      saysDontKnow: /je ne sais pas|aucune idée/i.test(cas.answer),
+      observationScore: 0, interpretationScore: 0
+    }
+  };
+  var t0 = Date.now();
+  return fetch(etat.url, {
+    method:'POST',
+    headers:{ 'content-type':'application/json', 'x-agora-token': etat.token },
+    body: JSON.stringify({ provider: provider, context: ctx })
+  }).then(function(r){
+    return r.json().then(function(d){
+      if(!r.ok) throw new Error((d && d.error) || ('relais ' + r.status));
+      return { provider:provider, question:d.question, intent:d.intent, model:d.model,
+               latency: d.latencyMs || (Date.now()-t0) };
+    });
+  });
+}
+
+function afficherCas(){
+  var cas = CAS[etat.i];
+  setText('caseNum', (etat.i+1) + ' / ' + CAS.length);
+  setText('casePhase', cas.phase);
+  setText('caseQuestion', cas.question);
+  setText('caseAnswer', cas.answer);
+  var b = $('progressBar'); if(b) b.style.width = Math.round(etat.i/CAS.length*100) + '%';
+  showEl('options', false);
+  showEl('retry', false);
+  var st = $('runStatus');
+  if(st){ st.className = 'status'; st.textContent = 'Interrogation des deux modèles…'; }
+
+  Promise.all([relais('anthropic', cas), relais('openai', cas)]).then(function(res){
+    /* ordre tiré au sort : le jugement doit être aveugle */
+    var paire = Math.random() < .5 ? [res[0], res[1]] : [res[1], res[0]];
+    etat.paire = paire;
+    setText('optAText', paire[0].question);
+    setText('optBText', paire[1].question);
+    setText('optAMeta', paire[0].latency + ' ms · intention ' + paire[0].intent);
+    setText('optBMeta', paire[1].latency + ' ms · intention ' + paire[1].intent);
+    showEl('options', true);
+    var s = $('runStatus'); if(s){ s.className='status'; s.textContent = 'Laquelle un examinateur poserait-il ?'; }
+  }).catch(function(e){
+    var s = $('runStatus');
+    if(s){ s.className = 'status err'; s.textContent = 'Échec : ' + (e && e.message || e); }
+    showEl('retry', true);
+  });
+}
+
+function choisir(index){
+  if(!etat.paire) return;
+  etat.choix.push({
+    cas: etat.i,
+    gagnant: index === null ? null : etat.paire[index].provider,
+    a: etat.paire[0], b: etat.paire[1]
+  });
+  etat.paire = null;
+  etat.i++;
+  if(etat.i >= CAS.length) terminer(); else afficherCas();
+}
+
+function moyenne(liste){
+  if(!liste.length) return 0;
+  var s=0; for(var i=0;i<liste.length;i++) s+=liste[i];
+  return Math.round(s/liste.length);
+}
+
+function terminer(){
+  showEl('run', false);
+  showEl('done', true);
+  var score = { anthropic:0, openai:0, nul:0 };
+  var lat = { anthropic:[], openai:[] };
+  var modeles = {};
+  for(var i=0;i<etat.choix.length;i++){
+    var c = etat.choix[i];
+    if(c.gagnant) score[c.gagnant]++; else score.nul++;
+    [c.a, c.b].forEach(function(r){ lat[r.provider].push(r.latency); modeles[r.provider] = r.model; });
+  }
+  var ecart = Math.abs(score.anthropic - score.openai);
+  var vainqueur = score.anthropic > score.openai ? 'Anthropic' : (score.openai > score.anthropic ? 'OpenAI' : null);
+
+  if(!vainqueur || ecart <= 2){
+    setText('verdict', 'Aucun écart significatif.');
+    setText('verdictDetail', 'Sur ' + CAS.length + ' situations, l’écart est de ' + ecart + '. Les deux jurys se valent sur cette tâche : choisis sur la latence, soit ' + moyenne(lat.anthropic) + ' ms contre ' + moyenne(lat.openai) + ' ms.');
+  } else {
+    setText('verdict', vainqueur + ' l’emporte.');
+    setText('verdictDetail', 'Écart de ' + ecart + ' sur ' + CAS.length + ' situations, ce qui est net. Latences moyennes : ' + moyenne(lat.anthropic) + ' ms pour Anthropic, ' + moyenne(lat.openai) + ' ms pour OpenAI.');
+  }
+
+  var t = '';
+  t += '<div class="resRow"><span>Anthropic — ' + (modeles.anthropic || '?') + '</span><b>' + score.anthropic + '</b></div>';
+  t += '<div class="resRow"><span>OpenAI — ' + (modeles.openai || '?') + '</span><b>' + score.openai + '</b></div>';
+  t += '<div class="resRow"><span>Égalités</span><b>' + score.nul + '</b></div>';
+  t += '<div class="resRow"><span>Latence médiane Anthropic</span><b>' + moyenne(lat.anthropic) + ' ms</b></div>';
+  t += '<div class="resRow"><span>Latence médiane OpenAI</span><b>' + moyenne(lat.openai) + ' ms</b></div>';
+  setHTML('tally', t);
+
+  var d = '';
+  for(var j=0;j<etat.choix.length;j++){
+    var ch = etat.choix[j];
+    d += '<div class="resRow"><span>' + (j+1) + '. ' + CAS[ch.cas].phase + '</span><b>' + (ch.gagnant || 'égalité') + '</b></div>';
+  }
+  setHTML('detail', d);
+}
+
+function demarrer(){
+  var u = $('relayUrl'), k = $('relayToken');
+  etat.url = u ? u.value.trim() : '';
+  etat.token = k ? k.value.trim() : '';
+  if(!/^https:\/\/.+/.test(etat.url)){
+    var s = $('setupStatus'); if(s){ s.className='status err'; s.textContent = 'Adresse invalide. Elle doit commencer par https:// et se terminer par /jury.'; }
+    return;
+  }
+  try { window.localStorage.setItem('agora.banc', JSON.stringify({ url:etat.url, token:etat.token })); } catch(e){}
+  etat.i = 0; etat.choix = [];
+  showEl('setup', false);
+  showEl('run', true);
+  afficherCas();
+}
+
+function init(){
+  on('start', demarrer);
+  on('optA', function(){ choisir(0); });
+  on('optB', function(){ choisir(1); });
+  on('optEqual', function(){ choisir(null); });
+  on('retry', afficherCas);
+  on('restart', function(){ showEl('done', false); showEl('setup', true); });
+  try {
+    var m = window.localStorage.getItem('agora.banc');
+    if(m){
+      var o = JSON.parse(m);
+      var u = $('relayUrl'), k = $('relayToken');
+      if(u && o.url) u.value = o.url;
+      if(k && o.token) k.value = o.token;
+    }
+  } catch(e){}
+}
+
+try { init(); } catch(e){ try { console.error('banc init', e); } catch(e2){} }
+</script>
+</body></html>
