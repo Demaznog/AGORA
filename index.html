@@ -405,11 +405,11 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
    Il n'empêche que la découverte fortuite du Worker ; la vraie
    protection est le filtrage d'origine côté Cloudflare.
    -------------------------------------------------------------------- */
-var RELAY_URL = '';
-var RELAY_TOKEN = '';
+var RELAY_URL = 'https://agora-jury.gonzague-drion.workers.dev/jury';
+var RELAY_TOKEN = 'REMPLACER_PAR_AGORA_TOKEN';
 var RELAY_TIMEOUT = 9000;
 
-var PROMPT_VERSION = 'rules-2026-09';
+var PROMPT_VERSION = 'jury-2026-09-03';
 var JURY_ENGINE = RELAY_URL ? 'model' : 'rules';   /* 'rules' | 'model' */
 var STORE_KEY = 'agora.v1.state';    /* nom définitif, ne jamais renommer */
 
@@ -419,7 +419,10 @@ function setText(id,v){ var e=$(id); if(e) e.textContent=v; }
 function setHTML(id,v){ var e=$(id); if(e) e.innerHTML=v; }
 function on(id,fn,type){ var e=$(id); if(e) e.addEventListener(type||'click',fn); }
 function showEl(id,visible){ var e=$(id); if(e) e.classList.toggle('hidden',!visible); }
-function mmss(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60), r=s%60; return (m<10?'0':'')+m+':'+(r<10?'0':'')+r; }
+/* Arrondi au supérieur : un décompte doit changer exactement une fois par
+   seconde. Avec Math.round il restait figé les trois premiers quarts de
+   seconde, ce qui donnait l'impression d'un chronomètre bloqué au lancement. */
+function mmss(s){ s=Math.max(0,Math.ceil(s-0.001)); var m=Math.floor(s/60), r=s%60; return (m<10?'0':'')+m+':'+(r<10?'0':'')+r; }
 
 /* ---------- stockage protégé (navigation privée) ---------- */
 var store = (function(){
@@ -674,6 +677,7 @@ function askJuryRules(ctx){
    jamais interrompre une séance. */
 function askJuryModel(ctx){
   if(!RELAY_URL) return Promise.reject(new Error('relais non configuré'));
+  if(typeof fetch !== 'function') return Promise.reject(new Error('fetch indisponible'));
   var controleur = null, minuteur = null;
   try { controleur = new AbortController(); } catch(e){ controleur = null; }
   if(controleur) minuteur = setTimeout(function(){ try { controleur.abort(); } catch(e){} }, RELAY_TIMEOUT);
@@ -705,7 +709,11 @@ var dernierRepli = '';
 
 function askJury(ctx){
   if(JURY_ENGINE === 'model'){
-    return askJuryModel(ctx).then(function(r){
+    var appel;
+    try { appel = askJuryModel(ctx); }
+    catch(e){ appel = Promise.reject(e); }   /* un throw synchrone ne doit pas tuer la séance */
+    if(!appel || typeof appel.then !== 'function') appel = Promise.reject(new Error('relais injoignable'));
+    return appel.then(function(r){
       r.engine = 'model'; return r;
     }).catch(function(e){
       dernierRepli = String(e && e.message || e);
@@ -802,6 +810,15 @@ function advancePhase(){
   }
 }
 
+/* Sépare strictement ce qui est lisible à l'écran de ce qui est réservé au jury.
+   Le cartel de la carte image doit rester la seule source « visible ». */
+function ficheTransmise(img){
+  return {
+    visible: { titre:img.titre, auteur:img.auteur, date:img.date, nature:img.nature, source:img.source },
+    jury:    { contexte:img.legende, themes:img.themes }
+  };
+}
+
 function processAnswer(raw){
   var analysis = analyzeAnswer(raw);
   var conf = PHASES[session.phase] || { maxTurns:3 };
@@ -813,11 +830,7 @@ function processAnswer(raw){
     elapsed: Math.round((Date.now()-session.startedAt)/1000),
     secondsLeft: clock.id ? Math.max(0, Math.round((clock.endsAt - Date.now())/1000)) : 0,
     previousQuestions: posees,
-    image: (session.phase === 'image' && session.image) ? {
-      titre: session.image.titre, auteur: session.image.auteur, date: session.image.date,
-      nature: session.image.nature, legende: session.image.legende,
-      source: session.image.source, themes: session.image.themes
-    } : null
+    image: (session.phase === 'image' && session.image) ? ficheTransmise(session.image) : null
   };
 
   askJury(ctx).then(function(next){
@@ -1700,6 +1713,10 @@ function init(){
   if(!store.usable){
     var e = $('voiceError');
     if(e){ e.className = 'voiceError show'; e.innerHTML = '<b>Navigation privée détectée.</b> L’historique des séances ne sera pas conservé.'; }
+  }
+  if(RELAY_URL && RELAY_TOKEN === 'REMPLACER_PAR_AGORA_TOKEN'){
+    var j = $('voiceError');
+    if(j){ j.className = 'voiceError show'; j.innerHTML = '<b>Jeton du relais non renseigné.</b> Le jury du relais sera refusé et AGORA retombera sur son moteur local. Renseigne RELAY_TOKEN dans index.html.'; }
   }
 }
 
