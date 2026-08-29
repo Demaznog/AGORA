@@ -183,6 +183,9 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .voiceRow button:active{transform:scale(.97)}
 .voiceNote{font-size:10px;line-height:1.5;color:#767d95;margin-top:9px}
 
+.voiceDumpToggle{background:none;border:0;padding:8px 0 0;color:#6f7691;font-size:10px;letter-spacing:.06em;text-decoration:underline;cursor:pointer}
+.voiceDump{margin-top:8px;padding:11px 12px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;line-height:1.65;color:#aab0c6;white-space:pre-wrap;word-break:break-all}
+
 @media(min-width:700px){body{padding:20px}.app{min-height:calc(100vh - 40px);border-radius:34px;background:var(--bg);box-shadow:0 25px 100px rgba(30,34,70,.13)}}
 </style>
 </head>
@@ -254,6 +257,8 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
           <button type="button" id="voiceTest">TESTER</button>
         </div>
         <div class="voiceNote" id="voiceNote"></div>
+        <button type="button" class="voiceDumpToggle" id="voiceDumpToggle">voir les voix détectées</button>
+        <div class="voiceDump hidden" id="voiceDump"></div>
       </div>
     </div>
   </div>
@@ -972,16 +977,24 @@ function listFrenchVoices(){
   } catch(e){ return []; }
 }
 
-/* Départage automatique quand aucun choix n'a été mémorisé :
-   les variantes améliorées / premium d'iOS d'abord, puis les voix
-   françaises de France, puis n'importe quelle voix française. */
+/* iOS ne met pas toujours la qualite dans le nom : sur plusieurs versions,
+   deux voix s'appellent identiquement « Aurelie » et seul le voiceURI
+   distingue com.apple.voice.compact de com.apple.voice.premium.
+   On lit donc les deux champs. */
+function voiceQuality(v){
+  var s = (v.name || '') + ' ' + (v.voiceURI || '');
+  if(/premium/i.test(s)) return 'premium';
+  if(/enhanced|am[ée]lior/i.test(s)) return 'améliorée';
+  if(/compact/i.test(s)) return 'compacte';
+  return '';
+}
+
+/* Départage automatique quand aucun choix n'a été mémorisé. */
 function rankVoice(v){
-  var n = (v.name || '');
-  var r = 0;
-  if(/premium|enhanced|am[ée]lior/i.test(n)) r += 4;
-  if(/siri/i.test(n)) r += 1;
+  var q = voiceQuality(v);
+  var r = q === 'premium' ? 6 : (q === 'améliorée' ? 4 : (q === 'compacte' ? 0 : 2));
   if(/^fr[-_]FR$/i.test(v.lang || '')) r += 2;
-  if(/compact/i.test(n)) r -= 3;
+  if(/siri/i.test((v.name || '') + ' ' + (v.voiceURI || ''))) r += 1;
   return r;
 }
 
@@ -1000,9 +1013,37 @@ function resolveVoice(){
 
 function voiceLabel(v){
   var n = (v.name || 'voix').replace(/\s*\(.*\)\s*$/,'');
-  var q = /premium/i.test(v.name) ? ' · premium'
-        : (/enhanced|am[ée]lior/i.test(v.name) ? ' · améliorée' : '');
-  return n + q;
+  var q = voiceQuality(v);
+  return n + (q ? ' · ' + q : '') + (/^fr[-_]FR$/i.test(v.lang || '') ? '' : ' · ' + v.lang);
+}
+
+/* Deux voix homonymes et de meme qualite restent distinguables. */
+function uniqueLabels(list){
+  var counts = {}, out = [], i;
+  for(i=0;i<list.length;i++){ var l = voiceLabel(list[i]); counts[l] = (counts[l] || 0) + 1; }
+  for(i=0;i<list.length;i++){
+    var lab = voiceLabel(list[i]);
+    if(counts[lab] > 1){
+      var uri = String(list[i].voiceURI || '');
+      lab += ' (' + uri.split('.').pop().slice(0,14) + ')';
+    }
+    out.push(lab);
+  }
+  return out;
+}
+
+function renderVoiceDump(){
+  var lines = [], vs = [];
+  try { if('speechSynthesis' in window) vs = window.speechSynthesis.getVoices() || []; } catch(e){ vs = []; }
+  lines.push(vs.length + ' voix exposées au navigateur, dont ' + frenchVoices.length + ' en français.');
+  lines.push('');
+  for(var i=0;i<vs.length;i++){
+    if(!/^fr(-|_|$)/i.test(vs[i].lang || '')) continue;
+    lines.push((i+1) + '. ' + (vs[i].name || '?') + ' — ' + (vs[i].lang || '?'));
+    lines.push('   ' + (vs[i].voiceURI || 'sans voiceURI') + (vs[i].localService ? ' — local' : ' — distant'));
+  }
+  if(frenchVoices.length === 0) lines.push('(aucune voix française dans la liste)');
+  setText('voiceDump', lines.join('\n'));
 }
 
 function renderVoicePicker(){
@@ -1027,19 +1068,21 @@ function renderVoicePicker(){
 
   sel.disabled = false;
   if(test) test.disabled = false;
+  var labels = uniqueLabels(frenchVoices);
   var html = '';
   for(var i=0;i<frenchVoices.length;i++){
     var v = frenchVoices[i];
     var choisie = frenchVoice && v.voiceURI === frenchVoice.voiceURI;
-    html += '<option value="' + v.voiceURI + '"' + (choisie ? ' selected' : '') + '>' + voiceLabel(v) + '</option>';
+    html += '<option value="' + v.voiceURI + '"' + (choisie ? ' selected' : '') + '>' + labels[i] + '</option>';
   }
   sel.innerHTML = html;
 
-  var amelioree = false;
-  for(var k=0;k<frenchVoices.length;k++){ if(/premium|enhanced|am[ée]lior/i.test(frenchVoices[k].name || '')) amelioree = true; }
-  setText('voiceNote', amelioree
-    ? frenchVoices.length + ' voix françaises disponibles.'
-    : frenchVoices.length + ' voix française(s), toutes compactes. Une variante améliorée se télécharge dans Réglages → Accessibilité → Contenu énoncé → Voix.');
+  var mieux = 0;
+  for(var k=0;k<frenchVoices.length;k++){ var q = voiceQuality(frenchVoices[k]); if(q === 'premium' || q === 'améliorée') mieux++; }
+  setText('voiceNote', mieux
+    ? frenchVoices.length + ' voix françaises, dont ' + mieux + ' en qualité supérieure.'
+    : frenchVoices.length + ' voix française(s), aucune en qualité supérieure. Safari n’expose pas toujours les voix premium téléchargées dans iOS.');
+  renderVoiceDump();
 }
 
 function loadVoices(){
@@ -1473,7 +1516,15 @@ function bind(){
   on('oralFinish', finishSession);
   on('micButton', toggleListening);
   on('voiceSelect', function(){ var e=$('voiceSelect'); if(e) chooseVoice(e.value); }, 'change');
-  on('voiceTest', function(){ speak('Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.'); });
+  on('voiceTest', function(){ speak('Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.'); setTimeout(loadVoices, 700); });
+  on('voiceDumpToggle', function(){
+    var e = $('voiceDump');
+    if(!e) return;
+    var ouvert = !e.classList.contains('hidden');
+    loadVoices();
+    showEl('voiceDump', ouvert ? false : true);
+    setText('voiceDumpToggle', ouvert ? 'voir les voix détectées' : 'masquer la liste');
+  });
 
   on('imageBack', function(){ clockStop(); showScreen('home'); });
   on('imgA', function(){ chooseImage(0); });
