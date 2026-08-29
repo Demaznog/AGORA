@@ -175,6 +175,14 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .voiceProgress span{width:22px;height:3px;border-radius:10px;background:rgba(255,255,255,.11)}
 .voiceProgress span.on{background:#817bff}
 
+.voicePicker{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07);text-align:left}
+.voicePicker label{display:block;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:#7f869e;font-weight:850;margin-bottom:8px}
+.voiceRow{display:flex;gap:8px;align-items:center}
+.voiceRow select{flex:1;min-width:0;font:inherit;font-size:12px;color:#dfe2ee;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:11px 12px;-webkit-appearance:none;appearance:none}
+.voiceRow button{flex:0 0 auto;font:inherit;font-size:10px;font-weight:850;letter-spacing:.08em;color:#c9cddc;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:11px 14px;cursor:pointer}
+.voiceRow button:active{transform:scale(.97)}
+.voiceNote{font-size:10px;line-height:1.5;color:#767d95;margin-top:9px}
+
 @media(min-width:700px){body{padding:20px}.app{min-height:calc(100vh - 40px);border-radius:34px;background:var(--bg);box-shadow:0 25px 100px rgba(30,34,70,.13)}}
 </style>
 </head>
@@ -238,6 +246,15 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
       </div>
 
       <div class="voiceError" id="voiceError"></div>
+
+      <div class="voicePicker" id="voicePicker">
+        <label for="voiceSelect">Voix du jury</label>
+        <div class="voiceRow">
+          <select id="voiceSelect"></select>
+          <button type="button" id="voiceTest">TESTER</button>
+        </div>
+        <div class="voiceNote" id="voiceNote"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -376,7 +393,7 @@ var STORE_KEY = 'agora.v1.state';    /* nom définitif, ne jamais renommer */
 function $(id){ try { return document.getElementById(id); } catch(e){ return null; } }
 function setText(id,v){ var e=$(id); if(e) e.textContent=v; }
 function setHTML(id,v){ var e=$(id); if(e) e.innerHTML=v; }
-function on(id,fn){ var e=$(id); if(e) e.addEventListener('click',fn); }
+function on(id,fn,type){ var e=$(id); if(e) e.addEventListener(type||'click',fn); }
 function showEl(id,visible){ var e=$(id); if(e) e.classList.toggle('hidden',!visible); }
 function mmss(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60), r=s%60; return (m<10?'0':'')+m+':'+(r<10?'0':'')+r; }
 
@@ -403,6 +420,7 @@ var DEFAULT_STATE = {
   prenom: 'Pierre',
   createdAt: null,
   priority: 'Répondre directement à la question avant de développer.',
+  voiceURI: null,
   sessions: [],
   seenImages: []
 };
@@ -941,16 +959,102 @@ var SR = (typeof window !== 'undefined') ? (window.SpeechRecognition || window.w
 var recognition = null;
 try { if(SR) recognition = new SR(); } catch(e){ recognition = null; }
 
-var frenchVoice = null;
-function loadVoices(){
+var frenchVoices = [];   /* voix françaises disponibles sur l'appareil */
+var frenchVoice = null;  /* voix retenue pour le jury */
+
+function listFrenchVoices(){
   try {
-    if(!('speechSynthesis' in window)) return;
+    if(!('speechSynthesis' in window)) return [];
     var vs = window.speechSynthesis.getVoices() || [];
-    frenchVoice = null;
-    for(var i=0;i<vs.length;i++){ if(/^fr[-_]/i.test(vs[i].lang) && /Thomas|Daniel|Nicolas|Remy|French/i.test(vs[i].name)){ frenchVoice = vs[i]; break; } }
-    if(!frenchVoice){ for(var j=0;j<vs.length;j++){ if(/^fr[-_]/i.test(vs[j].lang)){ frenchVoice = vs[j]; break; } } }
-  } catch(e){ frenchVoice = null; }
+    var out = [];
+    for(var i=0;i<vs.length;i++){ if(/^fr(-|_|$)/i.test(vs[i].lang || '')) out.push(vs[i]); }
+    return out;
+  } catch(e){ return []; }
 }
+
+/* Départage automatique quand aucun choix n'a été mémorisé :
+   les variantes améliorées / premium d'iOS d'abord, puis les voix
+   françaises de France, puis n'importe quelle voix française. */
+function rankVoice(v){
+  var n = (v.name || '');
+  var r = 0;
+  if(/premium|enhanced|am[ée]lior/i.test(n)) r += 4;
+  if(/siri/i.test(n)) r += 1;
+  if(/^fr[-_]FR$/i.test(v.lang || '')) r += 2;
+  if(/compact/i.test(n)) r -= 3;
+  return r;
+}
+
+function resolveVoice(){
+  frenchVoice = null;
+  if(!frenchVoices.length) return;
+  if(state.voiceURI){
+    for(var i=0;i<frenchVoices.length;i++){
+      if(frenchVoices[i].voiceURI === state.voiceURI){ frenchVoice = frenchVoices[i]; return; }
+    }
+  }
+  var best = frenchVoices[0];
+  for(var j=1;j<frenchVoices.length;j++){ if(rankVoice(frenchVoices[j]) > rankVoice(best)) best = frenchVoices[j]; }
+  frenchVoice = best;
+}
+
+function voiceLabel(v){
+  var n = (v.name || 'voix').replace(/\s*\(.*\)\s*$/,'');
+  var q = /premium/i.test(v.name) ? ' · premium'
+        : (/enhanced|am[ée]lior/i.test(v.name) ? ' · améliorée' : '');
+  return n + q;
+}
+
+function renderVoicePicker(){
+  var sel = $('voiceSelect'), note = $('voiceNote'), test = $('voiceTest');
+  if(!sel) return;
+  var dispo = false;
+  try { dispo = ('speechSynthesis' in window); } catch(e){ dispo = false; }
+
+  if(!dispo){
+    showEl('voicePicker', false);
+    return;
+  }
+  showEl('voicePicker', true);
+
+  if(!frenchVoices.length){
+    sel.innerHTML = '<option>Aucune voix française détectée</option>';
+    sel.disabled = true;
+    if(test) test.disabled = true;
+    setText('voiceNote', 'Réglages → Accessibilité → Contenu énoncé → Voix → Français, puis rouvre la page.');
+    return;
+  }
+
+  sel.disabled = false;
+  if(test) test.disabled = false;
+  var html = '';
+  for(var i=0;i<frenchVoices.length;i++){
+    var v = frenchVoices[i];
+    var choisie = frenchVoice && v.voiceURI === frenchVoice.voiceURI;
+    html += '<option value="' + v.voiceURI + '"' + (choisie ? ' selected' : '') + '>' + voiceLabel(v) + '</option>';
+  }
+  sel.innerHTML = html;
+
+  var amelioree = false;
+  for(var k=0;k<frenchVoices.length;k++){ if(/premium|enhanced|am[ée]lior/i.test(frenchVoices[k].name || '')) amelioree = true; }
+  setText('voiceNote', amelioree
+    ? frenchVoices.length + ' voix françaises disponibles.'
+    : frenchVoices.length + ' voix française(s), toutes compactes. Une variante améliorée se télécharge dans Réglages → Accessibilité → Contenu énoncé → Voix.');
+}
+
+function loadVoices(){
+  frenchVoices = listFrenchVoices();
+  resolveVoice();
+  renderVoicePicker();
+}
+
+function chooseVoice(uri){
+  state.voiceURI = uri || null;
+  save();
+  resolveVoice();
+  renderVoicePicker();
+}
+
 try {
   if('speechSynthesis' in window){
     loadVoices();
@@ -990,7 +1094,7 @@ function speak(text){
     setMic(false,'ÉCOUTE LE JURY');
     var u = new SpeechSynthesisUtterance(text);
     u.lang = 'fr-FR'; u.rate = .96; u.pitch = .94;
-    if(!frenchVoice) loadVoices();
+    if(!frenchVoice && !frenchVoices.length) loadVoices();
     if(frenchVoice) u.voice = frenchVoice;
     u.onend = function(){ voice.speaking = false; readyToSpeak(); };
     u.onerror = function(){ voice.speaking = false; readyToSpeak(); };
@@ -1368,6 +1472,8 @@ function bind(){
   on('oralRestart', function(){ var k = session ? session.kind : 'oral'; startSession(k); });
   on('oralFinish', finishSession);
   on('micButton', toggleListening);
+  on('voiceSelect', function(){ var e=$('voiceSelect'); if(e) chooseVoice(e.value); }, 'change');
+  on('voiceTest', function(){ speak('Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.'); });
 
   on('imageBack', function(){ clockStop(); showScreen('home'); });
   on('imgA', function(){ chooseImage(0); });
@@ -1389,6 +1495,7 @@ function bind(){
 
 function init(){
   bind();
+  renderVoicePicker();
   renderHome();
   renderImageStats();
   renderCulture();
