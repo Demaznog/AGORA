@@ -697,7 +697,9 @@ function askJuryModel(ctx){
     if(minuteur) clearTimeout(minuteur);
     var q = String(data && data.question || '').trim();
     if(q.length < 8) throw new Error('question vide');
-    return { question:q, intent:String(data.intent || 'précision'), latencyMs:data.latencyMs || null };
+    if(data.imageErreur) derniereImageErreur = data.imageErreur;
+    return { question:q, intent:String(data.intent || 'précision'),
+             latencyMs:data.latencyMs || null, imageEnvoyee:!!data.imageEnvoyee };
   }).catch(function(e){
     if(minuteur) clearTimeout(minuteur);
     throw e;
@@ -705,6 +707,7 @@ function askJuryModel(ctx){
 }
 
 var dernierRepli = '';
+var derniereImageErreur = '';
 
 function askJury(ctx){
   if(JURY_ENGINE === 'model'){
@@ -813,17 +816,30 @@ function advancePhase(){
 /* Sépare strictement ce qui est lisible à l'écran de ce qui est réservé au jury.
    Le cartel de la carte image doit rester la seule source « visible ». */
 function ficheTransmise(img){
-  return {
+  var fiche = {
     visible: { titre:img.titre, auteur:img.auteur, date:img.date, nature:img.nature, source:img.source },
     jury:    { contexte:img.legende, themes:img.themes }
   };
+  /* Adresse publique du visuel. Le relais va le chercher lui-même : l'image
+     ne transite jamais par le téléphone, seulement son adresse. */
+  if(img.fichier){
+    try { fiche.url = window.location.origin + '/assets/images/' + img.fichier; } catch(e){}
+  }
+  return fiche;
 }
 
 /* Le candidat doit savoir immédiatement si le jury est dégradé. Attendre le
    débrief pour l'annoncer laisse croire à une relance faible du vrai jury. */
-function signalerMoteur(engine){
+function signalerMoteur(engine, imageEnvoyee){
   var e = $('voiceError');
   if(!e) return;
+  if(engine === 'model' && session && session.phase === 'image' &&
+     session.image && session.image.fichier && !imageEnvoyee){
+    e.className = 'voiceError show';
+    e.innerHTML = '<b>Image non transmise au jury :</b> ' + (derniereImageErreur || 'motif inconnu') +
+                  '. Il travaille à partir de la fiche seule.';
+    return;
+  }
   if(engine === 'rules-fallback'){
     e.className = 'voiceError show';
     e.innerHTML = '<b>Jury dégradé :</b> le relais n’a pas répondu, cette question vient du moteur local. ' +
@@ -853,6 +869,7 @@ function processAnswer(raw){
       phase: session.phase, question: session.currentQuestion, answer: raw,
       analysis: analysis, intent: next.intent, engine: next.engine, at: Date.now(),
       turnInPhase: session.turn,
+      juryVoitImage: !!next.imageEnvoyee,
       /* Observation ne se mesure que devant un vrai visuel. Un aplat de
          couleur ne permet aucune description factuelle. */
       visuelReel: !!(session.phase === 'image' && session.image && session.image.fichier)
@@ -872,7 +889,7 @@ function processAnswer(raw){
     session.currentQuestion = next.question;
     setText('q', next.question);
     setText('voiceHint', 'Relance choisie : ' + next.intent + '.');
-    signalerMoteur(next.engine);
+    signalerMoteur(next.engine, next.imageEnvoyee);
     speak(next.question);
   });
 }
