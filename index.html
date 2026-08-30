@@ -389,6 +389,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 </section>
 </main>
 <script src="config.js"></script>
+<script src="images.js"></script>
 <script>
 /* ============================================================
    AGORA — prototype voice-first
@@ -470,7 +471,7 @@ function save(){ store.write(state); }
    assets/images/ ; null tant que le visuel n'est pas fourni.
    Les métadonnées doivent être revérifiées avant tout usage.
    ============================================================ */
-var IMAGES = [
+var IMAGES_DEFAUT = [
   { id:'img-001', fichier:null, nature:'peinture', periode:'XIXe', difficulte:3,
     titre:'La Liberté guidant le peuple', auteur:'Eugène Delacroix', date:'1830',
     source:'Musée du Louvre, Paris', droits:'Domaine public (œuvre) — reproduction à vérifier',
@@ -524,6 +525,13 @@ var IMAGES = [
     legende:'Dessin représentant un rassemblement populaire.',
     themes:['travail','mouvement social','représentation du peuple'] }
 ];
+
+/* Le corpus vit dans images.js, qui n'est jamais réécrit par une mise à
+   jour. Les fiches ci-dessus ne servent que si ce fichier manque. */
+var IMAGES = IMAGES_DEFAUT;
+try {
+  if(window.AGORA_IMAGES && window.AGORA_IMAGES.length) IMAGES = window.AGORA_IMAGES;
+} catch(e){}
 
 /* Appariement : natures différentes, périodes si possible différentes,
    difficultés proches (écart <= 1). */
@@ -1567,21 +1575,7 @@ function showOralVisual(visible){
   showEl('oralVisual', !!visible);
   showEl('oralVisualCaption', !!visible);
   if(visible && session && session.image){
-    var v = $('oralVisualImg');
-    if(v){
-      v.className = 'imageVisual ' + (session.image.fichier ? '' : 'placeholderA');
-      var vieille = v.querySelector('.placeholderMark');
-      if(vieille) v.removeChild(vieille);
-      if(session.image.fichier){
-        v.style.backgroundImage = 'url("assets/images/' + session.image.fichier + '")';
-      } else {
-        /* ne jamais laisser croire qu'un aplat de couleur est l'œuvre citée */
-        var m = document.createElement('span');
-        m.className = 'placeholderMark';
-        m.textContent = 'VISUEL NON FOURNI';
-        v.appendChild(m);
-      }
-    }
+    appliquerVisuel($('oralVisualImg'), session.image, 'placeholderA');
     var cap = session.image.titre + ' — ' + session.image.auteur + ', ' + session.image.date;
     if(!session.image.fichier) cap += ' · l’image n’est pas encore dans la bibliothèque';
     setText('oralVisualCaption', cap);
@@ -1596,7 +1590,12 @@ function startSession(kind){
   clearTranscript();
 
   if(kind === 'image'){
-    if(!session.image) session.image = currentPair ? currentPair[selectedIndex] : buildPair()[0];
+    /* selectedIndex vaut -1 après un renderPair : currentPair[-1] serait
+       undefined et ferait tomber la séance entière. */
+    if(!session.image){
+      var choisie = (currentPair && selectedIndex >= 0) ? currentPair[selectedIndex] : null;
+      session.image = choisie || buildPair()[0];
+    }
     setText('oralPhase', phaseLabel());
     showScreen('oral');
     enterPhase('image', "Vous avez choisi « " + session.image.titre + " ». Commencez par la décrire le plus précisément possible, sans l’interpréter.");
@@ -1681,6 +1680,34 @@ var currentPair = null;
 var selectedIndex = -1;
 var currentCultureQuestion = '';
 
+/* Un fichier déclaré mais absent ne doit jamais laisser un cadre vide :
+   la carte le dit, comme elle dit qu'un visuel n'a pas été fourni. */
+function appliquerVisuel(el, img, classeRepli){
+  if(!el) return;
+  var vieille = el.querySelector('.placeholderMark');
+  if(vieille) el.removeChild(vieille);
+
+  function repli(motif){
+    el.className = 'imageVisual ' + classeRepli;
+    el.style.backgroundImage = '';
+    var m = document.createElement('span');
+    m.className = 'placeholderMark';
+    m.textContent = motif;
+    el.appendChild(m);
+  }
+
+  if(!img.fichier){ repli('VISUEL NON FOURNI'); return; }
+
+  var url = 'assets/images/' + img.fichier;
+  el.className = 'imageVisual';
+  el.style.backgroundImage = 'url("' + url + '")';
+  try {
+    var sonde = new Image();
+    sonde.onerror = function(){ repli('FICHIER INTROUVABLE'); };
+    sonde.src = url;
+  } catch(e){}
+}
+
 function captionHTML(img){
   return '<b>' + img.titre + '</b>' + img.auteur + ', ' + img.date + ' — ' + img.nature +
          '<i>' + img.source + ' · ' + img.droits + '</i>';
@@ -1694,23 +1721,8 @@ function renderPair(){
   setHTML('imgBCaption', captionHTML(b));
   setText('imageDifficulty', 'Niveau ' + a.difficulte + '–' + b.difficulte + ' / 5');
 
-  var va = $('imgAVisual'), vb = $('imgBVisual');
-  if(va){
-    va.className = 'imageVisual' + (a.fichier ? '' : ' placeholderA');
-    if(a.fichier) va.style.backgroundImage = 'url("assets/images/' + a.fichier + '")';
-    var oldA = va.querySelector('.placeholderMark'); if(oldA) va.removeChild(oldA);
-    if(!a.fichier){
-      var ma = document.createElement('span'); ma.className='placeholderMark'; ma.textContent='VISUEL NON FOURNI'; va.appendChild(ma);
-    }
-  }
-  if(vb){
-    vb.className = 'imageVisual' + (b.fichier ? '' : ' placeholderB');
-    if(b.fichier) vb.style.backgroundImage = 'url("assets/images/' + b.fichier + '")';
-    var oldB = vb.querySelector('.placeholderMark'); if(oldB) vb.removeChild(oldB);
-    if(!b.fichier){
-      var mb = document.createElement('span'); mb.className='placeholderMark'; mb.textContent='VISUEL NON FOURNI'; vb.appendChild(mb);
-    }
-  }
+  appliquerVisuel($('imgAVisual'), a, 'placeholderA');
+  appliquerVisuel($('imgBVisual'), b, 'placeholderB');
   var ca = $('imgA'), cb = $('imgB');
   if(ca) ca.classList.remove('selected');
   if(cb) cb.classList.remove('selected');
