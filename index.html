@@ -1401,6 +1401,10 @@ function creerReco(){
   if(!SR) return null;
   var r;
   try { r = new SR(); } catch(e){ return null; }
+  /* Safari clôt souvent une instance sans confirmer le dernier segment :
+     il reste provisoire et serait perdu. On le conserve pour le récupérer
+     à la fermeture de l'instance. */
+  var dernierInterim = '';
   r.lang = 'fr-FR';
   r.continuous = !IOS;          /* ignoré, et nuisible, sur iOS */
   r.interimResults = true;
@@ -1419,6 +1423,7 @@ function creerReco(){
       if(event.results[i].isFinal) finalText += ' ' + txt; else interim += ' ' + txt;
     }
     voice.finalTranscript = finalText.trim();
+    dernierInterim = interim.trim();
     var box = $('liveTranscript');
     if(box){ box.className = 'transcript voiceTranscript'; box.textContent = (finalText + ' ' + interim).trim() || '…'; }
   };
@@ -1442,6 +1447,11 @@ function creerReco(){
 
   r.onend = function(){
     voice.listening = false;
+    /* récupération du segment resté provisoire */
+    if(dernierInterim){
+      voice.finalTranscript = (voice.finalTranscript + ' ' + dernierInterim).trim();
+      dernierInterim = '';
+    }
     if(!session) return;
     var fatale = ERREURS_FATALES.indexOf(voice.lastError) >= 0;
     if(!voice.manualStop && !fatale && voice.restarts < RELANCES_ECOUTE_MAX){
@@ -1541,9 +1551,23 @@ function showOralVisual(visible){
   showEl('oralVisualCaption', !!visible);
   if(visible && session && session.image){
     var v = $('oralVisualImg');
-    if(v) v.className = 'imageVisual ' + (session.image.fichier ? '' : 'placeholderA');
-    if(v && session.image.fichier) v.style.backgroundImage = 'url("assets/images/' + session.image.fichier + '")';
-    setText('oralVisualCaption', session.image.titre + ' — ' + session.image.auteur + ', ' + session.image.date + '. ' + session.image.legende);
+    if(v){
+      v.className = 'imageVisual ' + (session.image.fichier ? '' : 'placeholderA');
+      var vieille = v.querySelector('.placeholderMark');
+      if(vieille) v.removeChild(vieille);
+      if(session.image.fichier){
+        v.style.backgroundImage = 'url("assets/images/' + session.image.fichier + '")';
+      } else {
+        /* ne jamais laisser croire qu'un aplat de couleur est l'œuvre citée */
+        var m = document.createElement('span');
+        m.className = 'placeholderMark';
+        m.textContent = 'VISUEL NON FOURNI';
+        v.appendChild(m);
+      }
+    }
+    var cap = session.image.titre + ' — ' + session.image.auteur + ', ' + session.image.date;
+    if(!session.image.fichier) cap += ' · l’image n’est pas encore dans la bibliothèque';
+    setText('oralVisualCaption', cap);
   }
 }
 
