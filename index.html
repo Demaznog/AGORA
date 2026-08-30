@@ -100,9 +100,16 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .prepRow{display:flex;justify-content:space-between;align-items:center;color:#bdc2d2;font-size:11px;margin-top:13px}
 .prepRow strong{font-variant-numeric:tabular-nums;font-size:14px;color:#fff}
 .imagePrep .btn{margin-top:12px;background:#fff;color:var(--dark)}
-.oralVisual{margin:14px auto 4px;max-width:260px;border-radius:20px;overflow:hidden;background:#1b1f3d}
-.oralVisual .imageVisual{aspect-ratio:4/3}
+.oralVisual{margin:14px auto 4px;max-width:330px;border-radius:20px;overflow:hidden;background:#0e1128;cursor:zoom-in}
+/* « contain » : l'œuvre n'est jamais recadrée, le candidat voit ce que voit le jury */
+.oralVisual .imageVisual{aspect-ratio:4/3;background-size:contain;background-repeat:no-repeat;background-position:center}
 .oralVisualCaption{font-size:10px;line-height:1.4;color:#9aa0b8;margin:8px auto 0;max-width:300px}
+.zoomHint{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:#6f7691;margin:6px auto 0;font-weight:800}
+
+.zoomCouche{position:fixed;inset:0;z-index:50;background:rgba(6,8,20,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+.zoomCouche img{max-width:100%;max-height:78vh;border-radius:10px;object-fit:contain}
+.zoomCouche p{color:#aeb4c9;font-size:11px;line-height:1.5;text-align:center;margin:14px 0 0;max-width:420px}
+.zoomFermer{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#fff;font-size:19px;line-height:1;cursor:pointer}
 
 .imageStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:13px 0 4px}
 .imageStat{background:#fff;border:1px solid var(--line);border-radius:17px;padding:13px 11px}
@@ -243,6 +250,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
       <div class="orb" id="voiceOrb"></div>
 
       <div class="oralVisual hidden" id="oralVisual"><div class="imageVisual placeholderA" id="oralVisualImg"></div></div>
+      <div class="zoomHint hidden" id="zoomHint">Toucher l’image pour l’agrandir</div>
       <div class="oralVisualCaption hidden" id="oralVisualCaption"></div>
 
       <div class="timer" id="timer">02:00 · présentation</div>
@@ -425,6 +433,11 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
   </div>
   <button class="btn accent" id="debriefDone">TERMINER</button>
 </section>
+<div class="zoomCouche hidden" id="zoomCouche">
+  <button class="zoomFermer" id="zoomFermer" aria-label="Fermer">✕</button>
+  <img id="zoomImage" alt="">
+  <p id="zoomLegende"></p>
+</div>
 </main>
 <script src="config.js"></script>
 <script src="images.js"></script>
@@ -1995,9 +2008,25 @@ function showScreen(id){
   try { window.scrollTo({ top:0, behavior:'smooth' }); } catch(e){}
 }
 
+function ouvrirZoom(){
+  if(!session || !session.image || !session.image.fichier) return;
+  var img = $('zoomImage');
+  if(img) img.src = 'assets/images/' + session.image.fichier;
+  setText('zoomLegende', session.image.titre + ' — ' + session.image.auteur + ', ' +
+                         session.image.date + ' · ' + session.image.source);
+  showEl('zoomCouche', true);
+}
+function fermerZoom(){
+  showEl('zoomCouche', false);
+  var img = $('zoomImage');
+  if(img) img.removeAttribute('src');
+}
+
 function showOralVisual(visible){
   showEl('oralVisual', !!visible);
   showEl('oralVisualCaption', !!visible);
+  showEl('zoomHint', !!(visible && session && session.image && session.image.fichier));
+  if(!visible) fermerZoom();
   if(visible && session && session.image){
     appliquerVisuel($('oralVisualImg'), session.image, 'placeholderA');
     var cap = session.image.titre + ' — ' + session.image.auteur + ', ' + session.image.date;
@@ -2061,6 +2090,7 @@ function startSession(kind){
 }
 
 function quitOral(){
+  fermerZoom();
   clockStop();
   stopVoice();
   session = null;
@@ -2343,6 +2373,9 @@ function bind(){
   on('oralRestart', function(){ var k = session ? session.kind : 'oral'; startSession(k); });
   on('oralFinish', finishSession);
   on('micButton', toggleListening);
+  on('oralVisual', ouvrirZoom);
+  on('zoomCouche', fermerZoom);
+  on('zoomFermer', function(){ fermerZoom(); });
   on('voiceSelect', function(){ var e=$('voiceSelect'); if(e) chooseVoice(e.value); }, 'change');
   on('voiceTest', function(){ speak('Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.'); setTimeout(loadVoices, 700); });
   on('phrasingToggle', togglePhrasing);
