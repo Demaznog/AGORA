@@ -406,7 +406,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
    protection est le filtrage d'origine côté Cloudflare.
    -------------------------------------------------------------------- */
 var RELAY_URL = 'https://agora-jury.gonzague-drion.workers.dev/jury';
-var RELAY_TOKEN = 'ZERTGHUIOPTR2345809RTGDSZKL865';
+var RELAY_TOKEN = 'REMPLACER_PAR_AGORA_TOKEN';
 var RELAY_TIMEOUT = 9000;
 
 var PROMPT_VERSION = 'jury-2026-09-03';
@@ -741,7 +741,8 @@ var FLOWS = {
 };
 
 var session = null;
-var voice = { listening:false, speaking:false, finalTranscript:'' };
+var voice = { listening:false, speaking:false, finalTranscript:'',
+              manualStop:false, restarts:0, lastError:'' };
 
 function newSession(kind){
   return {
@@ -1051,8 +1052,19 @@ function finishSession(){
    VOIX
    ============================================================ */
 var SR = (typeof window !== 'undefined') ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
-var recognition = null;
-try { if(SR) recognition = new SR(); } catch(e){ recognition = null; }
+
+/* Safari iOS : `continuous` n'est pas honoré, la reconnaissance s'arrête à la
+   première pause, et une instance ayant échoué n'est plus réutilisable. On crée
+   donc une instance neuve à chaque prise de parole et on relance tant que le
+   candidat n'a pas appuyé pour terminer. */
+var IOS = false;
+try {
+  IOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+} catch(e){ IOS = false; }
+
+var RELANCES_ECOUTE_MAX = 24;
+var recognition = null;   /* instance courante, recréée à chaque écoute */
 
 var frenchVoices = [];   /* voix françaises disponibles sur l'appareil */
 var frenchVoice = null;  /* voix retenue pour le jury */
@@ -1302,38 +1314,51 @@ function sayNext(segments, i, token){
 }
 function stopVoice(){
   speechToken++;
+  voice.manualStop = true;          /* coupe toute relance automatique d'écoute */
   try { if('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch(e){}
-  try { if(recognition && voice.listening) recognition.stop(); } catch(e){}
+  try { if(recognition) { if(recognition.abort) recognition.abort(); else recognition.stop(); } } catch(e){}
   voice.listening = false; voice.speaking = false;
 }
 
-function toggleListening(){
-  if(!session){ startSession('oral'); return; }
-  if(voice.speaking) return;
-  if(!recognition){
-    var e = $('voiceError');
-    if(e){ e.className = 'voiceError show'; e.innerHTML = '<b>Reconnaissance vocale non disponible.</b> Ce prototype utilise la reconnaissance du navigateur. Essaie Chrome ou Safari récent et autorise le micro.'; }
-    return;
-  }
-  if(voice.listening){ try { recognition.stop(); } catch(e2){} return; }
-  voice.finalTranscript = '';
-  var box = $('liveTranscript');
-  if(box){ box.className = 'transcript voiceTranscript'; box.textContent = '…'; }
-  try { recognition.start(); } catch(e3){}
+var ERREURS_MICRO = {
+  'not-allowed':        'autorisation refusée. Autorise le micro pour ce site dans les réglages du navigateur.',
+  'service-not-allowed':'le service de reconnaissance est bloqué par le navigateur ou le système.',
+  'audio-capture':      'aucun micro accessible. Ferme les autres applications qui utilisent le micro.',
+  'network':            'le service de reconnaissance est injoignable. Vérifie la connexion.',
+  'language-not-supported':'le français n’est pas disponible pour la reconnaissance sur cet appareil.',
+  'no-speech':          'rien n’a été entendu.',
+  'aborted':            'la reconnaissance a été interrompue.'
+};
+var ERREURS_FATALES = ['not-allowed','service-not-allowed','audio-capture','language-not-supported'];
+
+function afficherErreurMicro(code, detail){
+  var e = $('voiceError');
+  if(!e) return;
+  var msg = ERREURS_MICRO[code] || 'erreur inattendue.';
+  e.className = 'voiceError show';
+  e.innerHTML = '<b>Micro (' + (code || 'inconnu') + ') :</b> ' + msg + (detail ? ' ' + detail : '');
+}
+function masquerErreurMicro(){
+  var e = $('voiceError');
+  if(e) e.className = 'voiceError';
 }
 
-if(recognition){
-  recognition.lang = 'fr-FR';
-  recognition.continuous = true;
-  recognition.interimResults = true;
+function creerReco(){
+  if(!SR) return null;
+  var r;
+  try { r = new SR(); } catch(e){ return null; }
+  r.lang = 'fr-FR';
+  r.continuous = !IOS;          /* ignoré, et nuisible, sur iOS */
+  r.interimResults = true;
 
-  recognition.onstart = function(){
+  r.onstart = function(){
     voice.listening = true;
     setVoiceState('listening','écoute…');
     setMic(true,'JE T’ÉCOUTE');
-    setText('voiceHint','Parle normalement. Appuie à nouveau pour terminer ta réponse.');
+    setText('voiceHint','Parle normalement. Appuie à nouveau quand tu as terminé ta réponse.');
   };
-  recognition.onresult = function(event){
+
+  r.onresult = function(event){
     var interim = '', finalText = voice.finalTranscript;
     for(var i = event.resultIndex; i < event.results.length; i++){
       var txt = event.results[i][0].transcript;
@@ -1343,35 +1368,100 @@ if(recognition){
     var box = $('liveTranscript');
     if(box){ box.className = 'transcript voiceTranscript'; box.textContent = (finalText + ' ' + interim).trim() || '…'; }
   };
-  recognition.onspeechend = function(){
-    setTimeout(function(){ if(voice.listening){ try { recognition.stop(); } catch(e){} } }, 900);
+
+  /* Hors iOS, un silence prolongé clôt la réponse. Sur iOS le moteur s'arrête
+     seul à chaque pause : seul l'appui du candidat clôt la réponse. */
+  r.onspeechend = function(){
+    if(IOS) return;
+    setTimeout(function(){ if(voice.listening) arreterEcoute(); }, 900);
   };
-  recognition.onend = function(){
+
+  r.onerror = function(event){
+    voice.lastError = (event && event.error) || 'inconnu';
+    if(ERREURS_FATALES.indexOf(voice.lastError) >= 0){
+      voice.manualStop = true;
+      afficherErreurMicro(voice.lastError);
+    }
+  };
+
+  r.onend = function(){
     voice.listening = false;
     if(!session) return;
-    setMic(false,'ANALYSE…');
-    setVoiceState('thinking','le jury réfléchit');
-    var raw = voice.finalTranscript.trim();
-    if(words(raw) < 4){
-      readyToSpeak();
-      setMic(false,'REPRENDRE LA RÉPONSE');
-      setText('voiceHint','Je n’ai pas suffisamment entendu ta réponse. Réessaie en parlant plus près du micro.');
+    var fatale = ERREURS_FATALES.indexOf(voice.lastError) >= 0;
+    if(!voice.manualStop && !fatale && voice.restarts < RELANCES_ECOUTE_MAX){
+      voice.restarts++;
+      /* on ne remet pas lastError à zéro : c'est ce code qui explique au
+         candidat, une fois la réponse close, pourquoi rien n'a été entendu. */
+      setTimeout(demarrerEcoute, 250);
       return;
     }
-    processAnswer(raw);
+    finirEcoute(fatale);
   };
-  recognition.onerror = function(event){
-    voice.listening = false;
+
+  return r;
+}
+
+function demarrerEcoute(){
+  if(!session || voice.listening) return;
+  recognition = creerReco();
+  if(!recognition){ finirEcoute(true); return; }
+  try { recognition.start(); }
+  catch(e){
+    voice.lastError = 'start-refuse';
+    afficherErreurMicro('start-refuse', 'Le navigateur a refusé d’ouvrir le micro. Appuie à nouveau sur le micro.');
+    setMic(false,'RÉESSAYER');
+    setVoiceState('ready','micro');
+  }
+}
+
+function arreterEcoute(){
+  voice.manualStop = true;
+  try { if(recognition) recognition.stop(); } catch(e){}
+}
+
+function finirEcoute(fatale){
+  var raw = voice.finalTranscript.trim();
+  if(fatale){
     setVoiceState('ready','micro');
     setMic(false,'RÉESSAYER');
+    return;
+  }
+  setMic(false,'ANALYSE…');
+  setVoiceState('thinking','le jury réfléchit');
+  if(words(raw) < 4){
+    readyToSpeak();
+    setMic(false,'REPRENDRE LA RÉPONSE');
+    setText('voiceHint','Je n’ai pas entendu suffisamment de mots. Appuie sur le micro et parle un peu plus près de l’appareil.');
+    if(voice.lastError === 'no-speech') afficherErreurMicro('no-speech', 'Appuie, attends une seconde, puis parle.');
+    return;
+  }
+  processAnswer(raw);
+}
+
+function toggleListening(){
+  if(!session){ startSession('oral'); return; }
+  if(voice.speaking) return;
+
+  if(!SR){
     var e = $('voiceError');
-    if(e){
-      e.className = 'voiceError show';
-      e.innerHTML = '<b>Micro :</b> ' + (event && event.error === 'not-allowed'
-        ? 'autorisation refusée. Autorise le micro dans le navigateur.'
-        : 'la reconnaissance a été interrompue. Réessaie.');
-    }
-  };
+    if(e){ e.className = 'voiceError show'; e.innerHTML = '<b>Reconnaissance vocale non disponible.</b> Ce prototype utilise la reconnaissance du navigateur. Essaie Safari ou Chrome récent et autorise le micro.'; }
+    return;
+  }
+
+  if(voice.listening){ arreterEcoute(); return; }
+
+  masquerErreurMicro();
+  voice.finalTranscript = '';
+  voice.manualStop = false;
+  voice.restarts = 0;
+  voice.lastError = '';
+  var box = $('liveTranscript');
+  if(box){ box.className = 'transcript voiceTranscript'; box.textContent = '…'; }
+
+  /* iOS garde la voie audio ouverte après la synthèse : on la libère
+     explicitement et on laisse un court délai avant d'ouvrir le micro. */
+  try { if('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch(e){}
+  setTimeout(demarrerEcoute, 220);
 }
 
 /* ============================================================
