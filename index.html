@@ -820,6 +820,21 @@ function ficheTransmise(img){
   };
 }
 
+/* Le candidat doit savoir immédiatement si le jury est dégradé. Attendre le
+   débrief pour l'annoncer laisse croire à une relance faible du vrai jury. */
+function signalerMoteur(engine){
+  var e = $('voiceError');
+  if(!e) return;
+  if(engine === 'rules-fallback'){
+    e.className = 'voiceError show';
+    e.innerHTML = '<b>Jury dégradé :</b> le relais n’a pas répondu, cette question vient du moteur local. ' +
+                  'Motif : ' + (dernierRepli || 'inconnu') + '.';
+  } else if(engine === 'model'){
+    e.className = 'voiceError';
+    e.innerHTML = '';
+  }
+}
+
 function processAnswer(raw){
   var analysis = analyzeAnswer(raw);
   var conf = PHASES[session.phase] || { maxTurns:3 };
@@ -854,6 +869,7 @@ function processAnswer(raw){
     session.currentQuestion = next.question;
     setText('q', next.question);
     setText('voiceHint', 'Relance choisie : ' + next.intent + '.');
+    signalerMoteur(next.engine);
     speak(next.question);
   });
 }
@@ -1380,7 +1396,9 @@ function creerReco(){
     voice.lastError = (event && event.error) || 'inconnu';
     if(ERREURS_FATALES.indexOf(voice.lastError) >= 0){
       voice.manualStop = true;
-      afficherErreurMicro(voice.lastError);
+      /* Une panne micro survenue alors que la réponse est déjà captée n'a
+         aucune conséquence pour le candidat : ne pas l'alarmer pour rien. */
+      if(words(voice.finalTranscript) < 4) afficherErreurMicro(voice.lastError);
     }
   };
 
@@ -1421,21 +1439,26 @@ function arreterEcoute(){
 
 function finirEcoute(fatale){
   var raw = voice.finalTranscript.trim();
+
+  /* Une réponse exploitable prime toujours sur l'incident technique.
+     Jeter la parole du candidat parce que le micro a lâché après coup
+     reviendrait à le pénaliser pour une défaillance matérielle. */
+  if(words(raw) >= 4){
+    setMic(false,'ANALYSE…');
+    setVoiceState('thinking','le jury réfléchit');
+    processAnswer(raw);
+    return;
+  }
+
   if(fatale){
     setVoiceState('ready','micro');
     setMic(false,'RÉESSAYER');
     return;
   }
-  setMic(false,'ANALYSE…');
-  setVoiceState('thinking','le jury réfléchit');
-  if(words(raw) < 4){
-    readyToSpeak();
-    setMic(false,'REPRENDRE LA RÉPONSE');
-    setText('voiceHint','Je n’ai pas entendu suffisamment de mots. Appuie sur le micro et parle un peu plus près de l’appareil.');
-    if(voice.lastError === 'no-speech') afficherErreurMicro('no-speech', 'Appuie, attends une seconde, puis parle.');
-    return;
-  }
-  processAnswer(raw);
+  readyToSpeak();
+  setMic(false,'REPRENDRE LA RÉPONSE');
+  setText('voiceHint','Je n’ai pas entendu suffisamment de mots. Appuie sur le micro et parle un peu plus près de l’appareil.');
+  if(voice.lastError === 'no-speech') afficherErreurMicro('no-speech', 'Appuie, attends une seconde, puis parle.');
 }
 
 function toggleListening(){
