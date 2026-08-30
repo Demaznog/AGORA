@@ -374,7 +374,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
     <div class="eyebrow">CE QUI A FRAGILISÉ</div>
     <p id="debriefImprove">—</p>
   </div>
-  <div class="card">
+  <div class="card" id="debriefReplayCard">
     <div class="eyebrow">À REJOUER</div>
     <p class="quote" id="debriefReplayQ">—</p>
     <button class="btn secondary" id="debriefReplay">REJOUER CETTE RÉPONSE</button>
@@ -388,6 +388,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
   <button class="btn accent" id="debriefDone">TERMINER</button>
 </section>
 </main>
+<script src="config.js"></script>
 <script>
 /* ============================================================
    AGORA — prototype voice-first
@@ -396,18 +397,16 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
    Moteur de jury : local à règles (JURY_ENGINE = 'rules').
    ============================================================ */
 
-/* ---- Relais de jury -------------------------------------------------
-   Laisser RELAY_URL vide tant que le Worker n'est pas déployé :
-   AGORA fonctionne alors sur son moteur local à règles.
-   Renseigner l'adresse bascule automatiquement sur le modèle,
-   avec repli sur les règles en cas d'échec ou de latence excessive.
-   RELAY_TOKEN n'est pas un secret : il est lisible dans la page.
-   Il n'empêche que la découverte fortuite du Worker ; la vraie
-   protection est le filtrage d'origine côté Cloudflare.
-   -------------------------------------------------------------------- */
-var RELAY_URL = 'https://agora-jury.gonzague-drion.workers.dev/jury';
-var RELAY_TOKEN = 'ZERTGHUIOPTR2345809RTGDSZKL865';
-var RELAY_TIMEOUT = 9000;
+/* ---- Configuration ---------------------------------------------------
+   Tout ce qui est propre à cette installation vit dans config.js, qui
+   n'est livré qu'une fois. Ce fichier-ci peut être remplacé à chaque
+   mise à jour sans rien perdre. Valeurs de repli si config.js manque. */
+var CFG = {};
+try { if(window.AGORA_CONFIG) CFG = window.AGORA_CONFIG; } catch(e){ CFG = {}; }
+
+var RELAY_URL = CFG.relayUrl || '';
+var RELAY_TOKEN = CFG.relayToken || '';
+var RELAY_TIMEOUT = CFG.relayTimeout || 9000;
 
 var PROMPT_VERSION = 'jury-2026-09-03';
 var JURY_ENGINE = RELAY_URL ? 'model' : 'rules';   /* 'rules' | 'model' */
@@ -444,7 +443,7 @@ var store = (function(){
 
 var DEFAULT_STATE = {
   version: 1,
-  prenom: 'Pierre',
+  prenom: CFG.prenom || 'Pierre',
   createdAt: null,
   priority: 'Répondre directement à la question avant de développer.',
   voiceURI: null,
@@ -852,7 +851,11 @@ function processAnswer(raw){
   askJury(ctx).then(function(next){
     session.turns.push({
       phase: session.phase, question: session.currentQuestion, answer: raw,
-      analysis: analysis, intent: next.intent, engine: next.engine, at: Date.now()
+      analysis: analysis, intent: next.intent, engine: next.engine, at: Date.now(),
+      turnInPhase: session.turn,
+      /* Observation ne se mesure que devant un vrai visuel. Un aplat de
+         couleur ne permet aucune description factuelle. */
+      visuelReel: !!(session.phase === 'image' && session.image && session.image.fichier)
     });
     session.turn++;
 
@@ -885,28 +888,42 @@ var DIMENSIONS = [
   { key:'observation',   label:'Observation' }
 ];
 
+/* Une présentation de deux minutes et une relance de trente secondes
+   n'ont pas la même longueur utile. Une bande unique notait à 96 une
+   présentation trois fois trop courte. */
+function bandeUtile(turn){
+  if(turn.phase === 'presentation' && turn.turnInPhase === 0) return [150, 320];
+  if(turn.phase === 'image' && turn.turnInPhase === 0) return [70, 200];
+  return [45, 110];
+}
+
+function scoreConcision(turn){
+  var b = bandeUtile(turn), wc = turn.analysis.wc;
+  if(wc < b[0]) return Math.max(0, wc / b[0]);
+  if(wc > b[1]) return Math.max(0, 1 - (wc - b[1]) / (b[1] * 1.3));
+  return 1;
+}
+
 function scoreSession(turns){
   var n = turns.length;
   var out = { concision:null, argumentation:null, nuance:null, illustration:null, observation:null, samples:n };
   if(!n) return out;
-  var sumWc=0, reason=0, nuance=0, example=0, obsTurns=0, obsScore=0;
+  var sumWc=0, reason=0, nuance=0, example=0, obsTurns=0, obsScore=0, conc=0;
   for(var i=0;i<n;i++){
     var a = turns[i].analysis;
     sumWc += a.wc;
+    conc  += scoreConcision(turns[i]);
     if(a.hasReason) reason++;
     if(a.hasNuance) nuance++;
     if(a.hasExample) example++;
-    if(turns[i].phase === 'image'){ obsTurns++; obsScore += Math.min(4,a.observationScore); }
+    if(turns[i].visuelReel){ obsTurns++; obsScore += Math.min(4,a.observationScore); }
   }
-  var avg = sumWc/n;
-  /* bande utile : 45 à 110 mots. Hors bande, le score décroît. */
-  var band = avg < 45 ? avg/45 : (avg > 110 ? Math.max(0, 1 - (avg-110)/140) : 1);
-  out.concision     = Math.round(band*100);
+  out.concision     = Math.round((conc/n)*100);
   out.argumentation = Math.round((reason/n)*100);
   out.nuance        = Math.round((nuance/n)*100);
   out.illustration  = Math.round((example/n)*100);
   out.observation   = obsTurns ? Math.round((obsScore/obsTurns/4)*100) : null;
-  out.avgWords      = Math.round(avg);
+  out.avgWords      = Math.round(sumWc/n);
   return out;
 }
 
@@ -951,6 +968,7 @@ function buildDebrief(sess){
     setText('debriefStrength2', '');
     setText('debriefImprove', 'Relance une séance et réponds au moins une fois pour obtenir un débrief.');
     setText('debriefReplayQ', '—');
+    showEl('debriefReplayCard', false);
     setHTML('debriefDims', '');
     return;
   }
@@ -970,20 +988,40 @@ function buildDebrief(sess){
   setText('debriefStrength2', forces[1] || '');
   setText('debriefImprove', prio ? prio.text : 'Poursuis sur le même rythme.');
 
-  /* moment à rejouer : le tour au score le plus faible sur la priorité */
-  var replay = turns[0];
-  for(var i=0;i<turns.length;i++){
-    var a = turns[i].analysis;
+  /* Moment à rejouer. Une question d'ouverture de séquence est exclue :
+     rejouer « présentez-vous » n'apprend rien. On cherche un tour où le
+     jury a réellement creusé, et qui est faible sur l'axe prioritaire. */
+  var candidats = [];
+  for(var c=0;c<turns.length;c++){ if(turns[c].turnInPhase > 0) candidats.push(turns[c]); }
+  if(!candidats.length) candidats = turns.slice(1);
+
+  var replay = null;
+  for(var i=0;i<candidats.length;i++){
+    var a = candidats[i].analysis;
     var faible = (prio && prio.key==='illustration' && !a.hasExample)
       || (prio && prio.key==='argumentation' && !a.hasReason)
       || (prio && prio.key==='nuance' && !a.hasNuance)
-      || (prio && prio.key==='concision' && a.wc > 140);
-    if(faible){ replay = turns[i]; break; }
+      || (prio && prio.key==='observation' && a.observationScore < 2)
+      || (prio && prio.key==='concision' && scoreConcision(candidats[i]) < .6);
+    if(faible){ replay = candidats[i]; break; }
   }
-  setText('debriefReplayQ', '« ' + replay.question + ' »');
-  session_replayQuestion = replay.question;
-  session_replayPhase = replay.phase;
-  session_replayImage = sess.image;
+  if(!replay && candidats.length){
+    /* aucun tour faible sur l'axe : on prend le plus court, souvent le plus pauvre */
+    replay = candidats[0];
+    for(var j=1;j<candidats.length;j++){
+      if(candidats[j].analysis.wc < replay.analysis.wc) replay = candidats[j];
+    }
+  }
+
+  showEl('debriefReplayCard', !!replay);
+  if(replay){
+    setText('debriefReplayQ', '« ' + replay.question + ' »');
+    session_replayQuestion = replay.question;
+    session_replayPhase = replay.phase;
+    session_replayImage = sess.image;
+  } else {
+    session_replayQuestion = '';
+  }
 
   var html = '';
   for(var d=0; d<DIMENSIONS.length; d++){
@@ -1827,9 +1865,13 @@ function init(){
     var e = $('voiceError');
     if(e){ e.className = 'voiceError show'; e.innerHTML = '<b>Navigation privée détectée.</b> L’historique des séances ne sera pas conservé.'; }
   }
-  if(RELAY_URL && RELAY_TOKEN === 'REMPLACER_PAR_AGORA_TOKEN'){
+  var alerte = '';
+  if(!CFG.relayUrl && !CFG.relayToken) alerte = '<b>config.js introuvable ou vide.</b> AGORA tourne sur son moteur local à règles.';
+  else if(RELAY_URL && (!RELAY_TOKEN || RELAY_TOKEN === 'REMPLACER_PAR_AGORA_TOKEN'))
+    alerte = '<b>Jeton du relais non renseigné.</b> Le relais refusera les appels et AGORA retombera sur son moteur local. Renseigne relayToken dans config.js.';
+  if(alerte){
     var j = $('voiceError');
-    if(j){ j.className = 'voiceError show'; j.innerHTML = '<b>Jeton du relais non renseigné.</b> Le jury du relais sera refusé et AGORA retombera sur son moteur local. Renseigne RELAY_TOKEN dans index.html.'; }
+    if(j){ j.className = 'voiceError show'; j.innerHTML = alerte; }
   }
 }
 
