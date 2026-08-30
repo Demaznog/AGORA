@@ -188,6 +188,17 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 
 .voiceLinks{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 
+.lecture{margin:14px 0 0}
+.lectureBloc{margin-top:16px}
+.lectureBloc:first-child{margin-top:4px}
+.lectureBloc h4{margin:0 0 8px;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--accent);font-weight:850}
+.lectureBloc ul{margin:0;padding:0;list-style:none}
+.lectureBloc li{position:relative;padding:0 0 0 15px;margin-bottom:7px;font-size:13px;line-height:1.5;color:#404757}
+.lectureBloc li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:#c3c0ff}
+.lectureBloc li.manque:before{background:#f0a58c}
+.lectureBloc li i{display:block;font-style:normal;font-size:11.5px;color:#7b8296;margin-top:3px}
+.lectureEtat{font-size:12px;color:var(--muted);line-height:1.5}
+
 @media(min-width:700px){body{padding:20px}.app{min-height:calc(100vh - 40px);border-radius:34px;background:var(--bg);box-shadow:0 25px 100px rgba(30,34,70,.13)}}
 </style>
 </head>
@@ -379,6 +390,18 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
     <p class="quote" id="debriefReplayQ">—</p>
     <button class="btn secondary" id="debriefReplay">REJOUER CETTE RÉPONSE</button>
   </div>
+  <div class="card hidden" id="debriefLectureCard">
+    <div class="eyebrow">LECTURE DE L’IMAGE · LE COACH</div>
+    <div class="lectureEtat" id="lectureEtat">Le coach relit la séance…</div>
+    <div class="lecture hidden" id="lectureCorps">
+      <div class="lectureBloc hidden" id="blocObserves"><h4>Ce que tu as observé</h4><ul id="lectureObserves"></ul></div>
+      <div class="lectureBloc hidden" id="blocManques"><h4>Ce que tu n’as pas mentionné</h4><ul id="lectureManques"></ul></div>
+      <div class="lectureBloc hidden" id="blocLectures"><h4>Lectures défendables</h4><ul id="lectureLectures"></ul></div>
+      <div class="lectureBloc hidden" id="blocPieges"><h4>Pièges de cette image</h4><ul id="lecturePieges"></ul></div>
+    </div>
+    <p class="note">Le coach n’intervient jamais pendant l’entretien. Ces lectures sont des lectures possibles, pas la réponse attendue : le jury n’en attend aucune en particulier.</p>
+  </div>
+
   <div class="card">
     <div class="eyebrow">SIGNAUX DE LA SÉANCE</div>
     <ul class="dimList" id="debriefDims"></ul>
@@ -697,7 +720,12 @@ function askJuryModel(ctx){
   if(controleur) options.signal = controleur.signal;
 
   return fetch(RELAY_URL, options).then(function(r){
-    return r.json().then(function(data){
+    /* Lire d'abord en texte : quand le relais tombe, Cloudflare renvoie une
+       page d'erreur, et un JSON.parse direct masque le vrai message. */
+    return r.text().then(function(brut){
+      var data = null;
+      try { data = JSON.parse(brut); }
+      catch(e){ throw new Error('réponse illisible du relais (' + r.status + ') : ' + brut.slice(0, 90)); }
       if(!r.ok) throw new Error((data && data.error) || ('relais ' + r.status));
       return data;
     });
@@ -1089,6 +1117,98 @@ var session_replayPhase = 'motivation';
 var session_replayImage = null;
 
 /* ============================================================
+   COACH — fiche de lecture d'image, après l'entretien seulement
+   ============================================================ */
+function askCoach(ctx){
+  if(!RELAY_URL) return Promise.reject(new Error('relais non configuré'));
+  if(typeof fetch !== 'function') return Promise.reject(new Error('fetch indisponible'));
+  var controleur = null, minuteur = null;
+  try { controleur = new AbortController(); } catch(e){ controleur = null; }
+  if(controleur) minuteur = setTimeout(function(){ try { controleur.abort(); } catch(e){} }, 25000);
+
+  var options = {
+    method:'POST',
+    headers:{ 'content-type':'application/json', 'x-agora-token': RELAY_TOKEN },
+    body: JSON.stringify({ context: ctx })
+  };
+  if(controleur) options.signal = controleur.signal;
+
+  return fetch(RELAY_URL.replace(/\/jury$/, '/coach'), options).then(function(r){
+    return r.text().then(function(brut){
+      var data = null;
+      try { data = JSON.parse(brut); }
+      catch(e){ throw new Error('réponse illisible (' + r.status + ') : ' + brut.slice(0, 90)); }
+      if(!r.ok) throw new Error((data && data.error) || ('relais ' + r.status));
+      if(!data.fiche) throw new Error('fiche absente');
+      return data.fiche;
+    });
+  }).then(function(f){ if(minuteur) clearTimeout(minuteur); return f; })
+    .catch(function(e){ if(minuteur) clearTimeout(minuteur); throw e; });
+}
+
+function listeVers(id, entrees, classe){
+  var html = '';
+  for(var i=0;i<entrees.length;i++){
+    html += '<li' + (classe ? ' class="' + classe + '"' : '') + '>' + echapper(entrees[i]) + '</li>';
+  }
+  setHTML(id, html);
+}
+function echapper(t){
+  return String(t == null ? '' : t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function afficherFicheLecture(fiche){
+  var obs = fiche.observes || [], man = fiche.manques || [],
+      lec = fiche.lectures || [], pie = fiche.pieges || [];
+
+  listeVers('lectureObserves', obs);
+  listeVers('lectureManques', man, 'manque');
+  var html = '';
+  for(var i=0;i<lec.length;i++){
+    html += '<li>' + echapper(lec[i].lecture) +
+            (lec[i].appui ? '<i>Appui visuel : ' + echapper(lec[i].appui) + '</i>' : '') + '</li>';
+  }
+  setHTML('lectureLectures', html);
+  listeVers('lecturePieges', pie);
+
+  showEl('blocObserves', obs.length > 0);
+  showEl('blocManques', man.length > 0);
+  showEl('blocLectures', lec.length > 0);
+  showEl('blocPieges', pie.length > 0);
+
+  if(!obs.length) setText('lectureEtat', 'Tu n’as pas encore décrit d’élément factuel : commence par là au prochain essai.');
+  else showEl('lectureEtat', false);
+  showEl('lectureCorps', true);
+}
+
+function demanderFicheLecture(sess){
+  var toursImage = sess.turns.filter(function(t){ return t.phase === 'image' && t.visuelReel; });
+  showEl('debriefLectureCard', toursImage.length > 0);
+  if(!toursImage.length) return;
+
+  showEl('lectureCorps', false);
+  showEl('lectureEtat', true);
+  setText('lectureEtat', 'Le coach relit la séance…');
+
+  var ctx = {
+    image: ficheTransmise(sess.image),
+    turns: toursImage.map(function(t){ return { question:t.question, answer:t.answer }; })
+  };
+
+  askCoach(ctx).then(function(fiche){
+    afficherFicheLecture(fiche);
+    /* conservée avec la séance : elle sera relisible plus tard */
+    var enreg = state.sessions[state.sessions.length - 1];
+    if(enreg && enreg.id === 'sess-' + sess.startedAt){ enreg.lecture = fiche; save(); }
+  }).catch(function(e){
+    showEl('lectureCorps', false);
+    showEl('lectureEtat', true);
+    setText('lectureEtat', 'La fiche de lecture n’a pas pu être produite : ' + (e && e.message || e) + '.');
+  });
+}
+
+/* ============================================================
    FIN DE SÉANCE + PERSISTANCE
    ============================================================ */
 function finishSession(){
@@ -1121,6 +1241,7 @@ function finishSession(){
   }
 
   buildDebrief(session);
+  demanderFicheLecture(session);
   renderHome();
   renderProgress();
   renderImageStats();
@@ -1708,9 +1829,12 @@ function appliquerVisuel(el, img, classeRepli){
   } catch(e){}
 }
 
+/* Cartel affiché au candidat. Le statut de droits est une métadonnée
+   juridique interne : il n'apparaît jamais à l'écran, comme dans l'épreuve
+   réelle où le candidat lit une légende, pas une notice de conservation. */
 function captionHTML(img){
   return '<b>' + img.titre + '</b>' + img.auteur + ', ' + img.date + ' — ' + img.nature +
-         '<i>' + img.source + ' · ' + img.droits + '</i>';
+         '<i>' + img.source + '</i>';
 }
 
 function renderPair(){
