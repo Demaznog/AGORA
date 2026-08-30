@@ -880,7 +880,10 @@ var SEQUENCES = {
 
 var session = null;
 var voice = { listening:false, speaking:false, finalTranscript:'',
-              manualStop:false, restarts:0, lastError:'' };
+              manualStop:false, restarts:0, lastError:'',
+              parleDepuis:0, ecouteDepuis:0 };
+var VERROU_MAX = 20000;   /* au-delà, un état « en cours » est considéré bloqué */
+var ECOUTE_MAX = 180000;  /* durée totale d'une prise de parole */
 
 var TOURS_ISOLES = { presentation:4, motivation:5 };
 
@@ -1790,13 +1793,17 @@ function direAvecRelais(texte, token){
   }).then(function(blob){
     if(token !== speechToken) throw new Error('énoncé annulé');
     return new Promise(function(resoudre, rejeter){
-      var url = URL.createObjectURL(blob);
-      function nettoyer(){ try { URL.revokeObjectURL(url); } catch(e){} }
-      a.onended = function(){ nettoyer(); resoudre(); };
-      a.onerror = function(){ nettoyer(); rejeter(new Error('lecture audio impossible')); };
+      var url = URL.createObjectURL(blob), fini = false, garde = null;
+      function nettoyer(){ if(garde) clearTimeout(garde); try { URL.revokeObjectURL(url); } catch(e){} }
+      function terminer(){ if(fini) return; fini = true; nettoyer(); resoudre(); }
+      a.onended = terminer;
+      a.onerror = function(){ if(fini) return; fini = true; nettoyer(); rejeter(new Error('lecture audio impossible')); };
+      /* iOS peut interrompre la lecture sans jamais déclencher onended :
+         sans ce garde-fou, l'état « le jury parle » ne se referme plus. */
+      garde = setTimeout(terminer, Math.max(12000, texte.length * 90 + 4000));
       a.src = url;
       var p = a.play();
-      if(p && typeof p.then === 'function') p.catch(function(e){ nettoyer(); rejeter(e); });
+      if(p && typeof p.then === 'function') p.catch(function(e){ if(fini) return; fini = true; nettoyer(); rejeter(e); });
     });
   });
 }
@@ -1817,6 +1824,7 @@ function speak(text){
   var token = speechToken;
   try { if(navigateurParle) window.speechSynthesis.cancel(); } catch(e){}
   voice.speaking = true;
+  voice.parleDepuis = Date.now();
   setVoiceState('speaking','le jury parle');
   setMic(false,'ÉCOUTE LE JURY');
 
@@ -1899,7 +1907,9 @@ var ERREURS_MICRO = {
   'network':            'le service de reconnaissance est injoignable. Vérifie la connexion.',
   'language-not-supported':'le français n’est pas disponible pour la reconnaissance sur cet appareil.',
   'no-speech':          'rien n’a été entendu.',
-  'aborted':            'la reconnaissance a été interrompue.'
+  'aborted':            'la reconnaissance a été interrompue.',
+  'micro-muet':         'le micro s’ouvre mais ne capte rien.',
+  'start-refuse':       'le navigateur a refusé d’ouvrir le micro.'
 };
 var ERREURS_FATALES = ['not-allowed','service-not-allowed','audio-capture','language-not-supported'];
 
@@ -1972,7 +1982,8 @@ function creerReco(){
     }
     if(!session) return;
     var fatale = ERREURS_FATALES.indexOf(voice.lastError) >= 0;
-    if(!voice.manualStop && !fatale && voice.restarts < RELANCES_ECOUTE_MAX){
+    var tropLong = (Date.now() - voice.ecouteDepuis) > ECOUTE_MAX;
+    if(!voice.manualStop && !fatale && !tropLong && voice.restarts < RELANCES_ECOUTE_MAX){
       voice.restarts++;
       /* on ne remet pas lastError à zéro : c'est ce code qui explique au
          candidat, une fois la réponse close, pourquoi rien n'a été entendu. */
@@ -1992,7 +2003,7 @@ function demarrerEcoute(){
   try { recognition.start(); }
   catch(e){
     voice.lastError = 'start-refuse';
-    afficherErreurMicro('start-refuse', 'Le navigateur a refusé d’ouvrir le micro. Appuie à nouveau sur le micro.');
+    afficherErreurMicro('start-refuse', 'Appuie à nouveau sur le micro.');
     setMic(false,'RÉESSAYER');
     setVoiceState('ready','micro');
   }
@@ -2001,6 +2012,14 @@ function demarrerEcoute(){
 function arreterEcoute(){
   voice.manualStop = true;
   try { if(recognition) recognition.stop(); } catch(e){}
+  /* Une instance morte ne déclenche jamais onend : sans ce garde-fou,
+     l'écoute reste ouverte et le bouton micro ne répond plus. */
+  setTimeout(function(){
+    if(voice.listening && voice.manualStop){
+      voice.listening = false;
+      finirEcoute(false);
+    }
+  }, 2500);
 }
 
 function finirEcoute(fatale){
@@ -2024,12 +2043,36 @@ function finirEcoute(fatale){
   readyToSpeak();
   setMic(false,'REPRENDRE LA RÉPONSE');
   setText('voiceHint','Je n’ai pas entendu suffisamment de mots. Appuie sur le micro et parle un peu plus près de l’appareil.');
-  if(voice.lastError === 'no-speech') afficherErreurMicro('no-speech', 'Appuie, attends une seconde, puis parle.');
+  /* Le moteur a rendu la main sans rien capter, souvent en quelques secondes :
+     le dire, sinon l'écran paraît s'être arrêté tout seul. */
+  if(voice.restarts >= RELANCES_ECOUTE_MAX){
+    afficherErreurMicro('micro-muet',
+      'La reconnaissance s’est relancée ' + voice.restarts + ' fois sans rien capter. Appuie à nouveau, attends une seconde, puis parle. Si cela se répète, ferme les autres applications qui utilisent le micro.');
+  } else if(voice.lastError === 'no-speech'){
+    afficherErreurMicro('no-speech', 'Appuie, attends une seconde, puis parle.');
+  }
 }
 
 function toggleListening(){
   deverrouillerAudio();
   if(!session){ startSession('oral'); return; }
+
+  /* Sortie de secours : si un état « en cours » dure anormalement, on le
+     considère bloqué plutôt que de laisser le bouton sans effet. */
+  var maintenant = Date.now();
+  if(voice.speaking && maintenant - voice.parleDepuis > VERROU_MAX){
+    stopVoice();
+    voice.speaking = false;
+    readyToSpeak();
+  }
+  if(voice.listening && maintenant - voice.ecouteDepuis > ECOUTE_MAX + VERROU_MAX){
+    voice.listening = false;
+    voice.manualStop = true;
+    try { if(recognition && recognition.abort) recognition.abort(); } catch(e){}
+    finirEcoute(false);
+    return;
+  }
+
   if(voice.speaking) return;
 
   if(!SR){
@@ -2045,6 +2088,7 @@ function toggleListening(){
   voice.manualStop = false;
   voice.restarts = 0;
   voice.lastError = '';
+  voice.ecouteDepuis = Date.now();
   var box = $('liveTranscript');
   if(box){ box.className = 'transcript voiceTranscript'; box.textContent = '…'; }
 
