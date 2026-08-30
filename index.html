@@ -301,7 +301,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
     </div>
     <div class="imagePrep" id="imgPrompt">
       <b id="imgPromptTitle">Avant de parler</b>
-      <span id="imgPromptText">Choisis une image, puis décris précisément ce que tu observes. N’interprète pas encore.</span>
+      <span id="imgPromptText">Choisis une image. Le jour J, tu conduis l’analyse seul : décris précisément, puis propose ton interprétation, sans attendre qu’on te le demande.</span>
       <div class="prepRow"><span id="prepLabel">Préparation</span><strong id="prepTimer">01:30</strong></div>
       <button class="btn" id="imgStart" disabled>COMMENCER L’ANALYSE</button>
     </div>
@@ -670,12 +670,14 @@ function askJuryRules(ctx){
     return { intent:'précision', question:"Votre réponse est très courte. Pouvez-vous préciser votre idée et donner une raison concrète ?" };
 
   if(ctx.phase === 'image'){
-    if(a.interpretationScore > a.observationScore && ctx.turn <= 1)
-      return { intent:'observation', question:"Vous interprétez déjà beaucoup. Revenons à l’image : quels éléments précis et directement observables soutiennent cette lecture ?" };
-    if(a.observationScore < 2)
+    /* même progression que celle imposée au modèle : la séquence doit
+       atteindre l'interprétation, pas s'enliser dans la description. */
+    if(ctx.etape === 'description')
       return { intent:'observation', question:"Avant d’aller plus loin, décrivez-moi un détail visuel précis que vous n’avez pas encore mentionné." };
-    if(ctx.turn >= 2)
+    if(ctx.etape === 'alternative')
       return { intent:'contradiction', question:"Proposez maintenant une lecture différente, voire opposée, de cette image. Qu’est-ce qui la rendrait défendable ?" };
+    if(ctx.etape === 'synthese')
+      return { intent:'synthèse', question:"Reformulez votre position en trente secondes, en tenant compte de ce que nous venons d’échanger." };
     return { intent:'justification', question:"Quelle est votre interprétation principale, et quel élément visuel la justifie le mieux ?" };
   }
 
@@ -817,10 +819,12 @@ var SEQUENCES = {
     lead: 'Choisis entre deux images, lis la légende, puis conduis l’analyse.',
     attentes: [
       'Lire la légende, décrire précisément l’image, puis en proposer une interprétation.',
+      'Tu conduis l’analyse seul : n’attends pas une question pour passer au sens.',
       'La description n’est pas facultative : elle précède et fonde l’interprétation.',
+      'Le jury relance ensuite, approfondit, et soulève parfois ce que tu n’as pas vu.',
       'Aucune connaissance préalable de l’œuvre n’est exigée.',
       'Le jury n’attend aucune lecture particulière, mais un échange autour des interprétations possibles.',
-      'Il peut soulever des éléments que tu n’as pas identifiés : c’est le jeu, pas une sanction.'
+      'Sur dix à quinze minutes, personne ne parle seul : c’est un échange.'
     ],
     source: 'D’après la page officielle de l’épreuve orale, Sciences Po Admissions.'
   },
@@ -905,12 +909,44 @@ function advancePhase(){
   var next = session.flow[session.flowIndex];
   if(next === 'image'){
     if(!session.image) session.image = buildPair()[0];
-    enterPhase('image', "Passons à l’image. Décrivez-la le plus précisément possible, sans l’interpréter.");
+    enterPhase('image', "Passons à l’image. Décrivez-la précisément, puis proposez-nous votre interprétation. Nous vous écoutons.");
   } else if(next === 'motivation'){
     enterPhase('motivation', "Nous allons parler de vos motivations. Pourquoi souhaitez-vous intégrer Sciences Po ?");
   } else {
     enterPhase(next, "Poursuivons.");
   }
+}
+
+/* Étape de la séquence image, décidée par l'orchestrateur et imposée au jury.
+   Sans elle, le modèle redemandait indéfiniment de décrire et la séquence
+   n'atteignait jamais l'interprétation que l'épreuve exige. */
+var OBSERVATION_SUFFISANTE = 4;
+
+function etapeImage(analysisCourante){
+  var obs = 0, n = 0, franchies = 0;
+  for(var i=0;i<session.turns.length;i++){
+    var t = session.turns[i];
+    if(t.phase !== 'image') continue;
+    obs += Math.min(4, t.analysis.observationScore);
+    n++;
+    if(t.etape && t.etape !== 'description') franchies++;
+  }
+  obs += Math.min(4, analysisCourante.observationScore);
+  n++;
+
+  /* deux tours de description au plus si elle reste pauvre, puis on avance :
+     mieux vaut une interprétation fragile qu'une séquence enlisée. */
+  if(n < 3 && obs < OBSERVATION_SUFFISANTE) return 'description';
+
+  /* Le candidat doit conduire l'analyse seul : s'il a déjà décrit ET
+     interprété, on ne lui redemande pas une interprétation qu'il a donnée. */
+  if(franchies === 0 && analysisCourante.interpretationScore >= 2) return 'alternative';
+
+  /* la suite dépend des étapes déjà franchies, pas du numéro de tour :
+     une description laborieuse ne doit pas faire sauter l'interprétation. */
+  if(franchies === 0) return 'interpretation';
+  if(franchies === 1) return 'alternative';
+  return 'synthese';
 }
 
 /* Sépare strictement ce qui est lisible à l'écran de ce qui est réservé au jury.
@@ -962,6 +998,7 @@ function processAnswer(raw){
     question: session.currentQuestion,
     elapsed: Math.round((Date.now()-session.startedAt)/1000),
     secondsLeft: clock.id ? Math.max(0, Math.round((clock.endsAt - Date.now())/1000)) : 0,
+    etape: session.phase === 'image' ? etapeImage(analysis) : null,
     previousQuestions: posees,
     image: (session.phase === 'image' && session.image) ? ficheTransmise(session.image) : null
   };
@@ -971,6 +1008,7 @@ function processAnswer(raw){
       phase: session.phase, question: session.currentQuestion, answer: raw,
       analysis: analysis, intent: next.intent, engine: next.engine, at: Date.now(),
       turnInPhase: session.turn,
+      etape: ctx.etape || null,
       juryVoitImage: !!next.imageEnvoyee,
       /* Observation ne se mesure que devant un vrai visuel. Un aplat de
          couleur ne permet aucune description factuelle. */
@@ -1840,7 +1878,7 @@ function startSession(kind){
     }
     setText('oralPhase', phaseLabel());
     showScreen('oral');
-    enterPhase('image', "Vous avez choisi « " + session.image.titre + " ». Commencez par la décrire le plus précisément possible, sans l’interpréter.");
+    enterPhase('image', "Vous avez choisi « " + session.image.titre + " ». Décrivez-la précisément, puis proposez-nous votre interprétation. Nous vous écoutons.");
     return;
   }
   if(kind === 'presentation'){
@@ -1984,7 +2022,7 @@ function renderPair(){
   if(ca) ca.classList.remove('selected');
   if(cb) cb.classList.remove('selected');
   setText('imgPromptTitle','Avant de parler');
-  setText('imgPromptText','Choisis une image, puis décris précisément ce que tu observes. N’interprète pas encore.');
+  setText('imgPromptText','Choisis une image. Le jour J, tu conduis l’analyse seul : décris précisément, puis propose ton interprétation, sans attendre qu’on te le demande.');
   setText('prepLabel','Préparation');
   setText('prepTimer','01:30');
   var s = $('imgStart'); if(s) s.disabled = true;
@@ -1998,7 +2036,7 @@ function chooseImage(index){
   if(cb) cb.classList.toggle('selected', index === 1);
   var img = currentPair[index];
   setText('imgPromptTitle','Image sélectionnée · avant de parler');
-  setText('imgPromptText','« ' + img.titre + ' ». Lis la légende, puis décris précisément ce que tu observes. N’interprète pas encore.');
+  setText('imgPromptText','« ' + img.titre + ' ». Lis le cartel, décris précisément, puis propose ton interprétation. Le jury relancera ensuite.');
   var s = $('imgStart'); if(s) s.disabled = false;
 
   clockStart(90, function(left){
