@@ -15,7 +15,7 @@ window.AGORA_CONFIG = {
   /* Doit être identique au secret AGORA_TOKEN du Worker.
      Ce n'est pas un secret de sécurité : il est lisible dans la page.
      Il empêche seulement l'usage fortuit du relais par un tiers. */
-  relayToken: 'REMPLACER_PAR_AGORA_TOKEN',
+  relayToken: 'ZERTGHUIOPTR2345809RTGDSZKL865',
 
   /* Délai au-delà duquel AGORA retombe sur son moteur local, en ms. */
   relayTimeout: 9000,
