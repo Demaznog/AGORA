@@ -222,8 +222,10 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
   </div>
 
   <div class="grid">
-    <button class="tile" id="tileOral"><div class="tileTop"><div class="ico">◉</div><div class="arr">↗</div></div><div><b>Oral blanc</b><span>≈ 25 min · conditions entretien</span></div></button>
-    <button class="tile" id="tileImage"><div class="tileTop"><div class="ico">▧</div><div class="arr">↗</div></div><div><b>Défi image</b><span>Analyse, nuance, contradiction</span></div></button>
+    <button class="tile" id="tileOral"><div class="tileTop"><div class="ico">◉</div><div class="arr">↗</div></div><div><b>Oral blanc</b><span>≈ 25 min · les trois séquences</span></div></button>
+    <button class="tile" id="tilePresentation"><div class="tileTop"><div class="ico">❶</div><div class="arr">↗</div></div><div><b>Présentation</b><span>2 minutes · séquence 1 seule</span></div></button>
+    <button class="tile" id="tileImage"><div class="tileTop"><div class="ico">❷</div><div class="arr">↗</div></div><div><b>Défi image</b><span>Décrire, interpréter · séquence 2</span></div></button>
+    <button class="tile" id="tileMotivation"><div class="tileTop"><div class="ico">❸</div><div class="arr">↗</div></div><div><b>Motivations</b><span>Projet, cohérence · séquence 3</span></div></button>
     <button class="tile" id="tileCulture"><div class="tileTop"><div class="ico">↯</div><div class="arr">↗</div></div><div><b>Culture &amp; idées</b><span>Réfléchir vite, argumenter mieux</span></div></button>
     <button class="tile" id="tileProgress"><div class="tileTop"><div class="ico">↗</div><div class="arr">↗</div></div><div><b>Progression</b><span>Forces, angles morts, évolution</span></div></button>
   </div>
@@ -311,6 +313,19 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
   </div>
 </section>
 
+<section id="sequence" class="screen">
+  <button class="back" id="seqBack">← Accueil</button>
+  <div class="eyebrow" id="seqEyebrow">—</div>
+  <h2 id="seqTitre">—</h2>
+  <p class="lead" id="seqLead">—</p>
+  <div class="card">
+    <div class="eyebrow">CE QUE LE JURY ATTEND</div>
+    <ul class="lectureBloc" id="seqAttentes"></ul>
+    <p class="note" id="seqSource">—</p>
+  </div>
+  <button class="btn accent" id="seqStart">COMMENCER</button>
+</section>
+
 <section id="culture" class="screen">
   <button class="back" id="cultureBack">← Accueil</button>
   <div class="eyebrow">CULTURE &amp; IDÉES · 3 MIN</div>
@@ -391,15 +406,15 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
     <button class="btn secondary" id="debriefReplay">REJOUER CETTE RÉPONSE</button>
   </div>
   <div class="card hidden" id="debriefLectureCard">
-    <div class="eyebrow">LECTURE DE L’IMAGE · LE COACH</div>
+    <div class="eyebrow" id="lectureTitre">LE COACH</div>
     <div class="lectureEtat" id="lectureEtat">Le coach relit la séance…</div>
     <div class="lecture hidden" id="lectureCorps">
-      <div class="lectureBloc hidden" id="blocObserves"><h4>Ce que tu as observé</h4><ul id="lectureObserves"></ul></div>
-      <div class="lectureBloc hidden" id="blocManques"><h4>Ce que tu n’as pas mentionné</h4><ul id="lectureManques"></ul></div>
-      <div class="lectureBloc hidden" id="blocLectures"><h4>Lectures défendables</h4><ul id="lectureLectures"></ul></div>
-      <div class="lectureBloc hidden" id="blocPieges"><h4>Pièges de cette image</h4><ul id="lecturePieges"></ul></div>
+      <div class="lectureBloc hidden" id="blocObserves"><h4 id="titreGarde">—</h4><ul id="lectureObserves"></ul></div>
+      <div class="lectureBloc hidden" id="blocManques"><h4 id="titreManques">—</h4><ul id="lectureManques"></ul></div>
+      <div class="lectureBloc hidden" id="blocLectures"><h4 id="titrePistes">—</h4><ul id="lectureLectures"></ul></div>
+      <div class="lectureBloc hidden" id="blocPieges"><h4 id="titrePieges">—</h4><ul id="lecturePieges"></ul></div>
     </div>
-    <p class="note">Le coach n’intervient jamais pendant l’entretien. Ces lectures sont des lectures possibles, pas la réponse attendue : le jury n’en attend aucune en particulier.</p>
+    <p class="note">Le coach n’intervient jamais pendant l’entretien. Il ne rédige pas ta réponse : il montre ce que l’exercice demande et ce qui manquait, à toi de construire.</p>
   </div>
 
   <div class="card">
@@ -767,20 +782,68 @@ function askJury(ctx){
    ============================================================ */
 var PHASES = {
   presentation: { label:'PRÉSENTATION', seconds:120, maxTurns:3 },
+  /* en séquence isolée, on laisse plus de tours qu'en oral complet */
   image:        { label:'ANALYSE D’IMAGE', seconds:600, maxTurns:5 },
   motivation:   { label:'MOTIVATIONS & PROJET', seconds:720, maxTurns:5 },
   culture:      { label:'CULTURE & IDÉES', seconds:180, maxTurns:4 }
 };
 var FLOWS = {
-  oral:   ['presentation','image','motivation'],
-  image:  ['image'],
-  culture:['culture'],
-  replay: ['motivation']
+  oral:        ['presentation','image','motivation'],
+  presentation:['presentation'],
+  image:       ['image'],
+  motivation:  ['motivation'],
+  culture:     ['culture'],
+  replay:      ['motivation']
+};
+
+/* Cadrage affiché avant une séquence isolée. Les attentes sont celles
+   publiées par Sciences Po pour l'oral d'admission en Bachelor. */
+var SEQUENCES = {
+  presentation: {
+    eyebrow: 'SÉQUENCE 1 · 2 MINUTES',
+    titre: 'Te présenter sans te réciter.',
+    lead: 'Deux minutes pour donner au jury de quoi te connaître, et de quoi te relancer.',
+    attentes: [
+      'Parcours, profil, centres d’intérêt, projet et motivations, en deux minutes maximum.',
+      'Une présentation ni lue ni récitée : le jury repère immédiatement un texte appris.',
+      'Des prises concrètes : une expérience, un engagement, une curiosité nommée précisément.',
+      'Clair et synthétique, pas exhaustif : le jury creusera lui-même ce qui l’intéresse.'
+    ],
+    source: 'D’après les modalités publiées par Sciences Po pour l’admission en Bachelor.'
+  },
+  image: {
+    eyebrow: 'SÉQUENCE 2 · ENVIRON 10 MINUTES',
+    titre: 'Décrire d’abord, interpréter ensuite.',
+    lead: 'Choisis entre deux images, lis la légende, puis conduis l’analyse.',
+    attentes: [
+      'Lire la légende, décrire précisément l’image, puis en proposer une interprétation.',
+      'La description n’est pas facultative : elle précède et fonde l’interprétation.',
+      'Aucune connaissance préalable de l’œuvre n’est exigée.',
+      'Le jury n’attend aucune lecture particulière, mais un échange autour des interprétations possibles.',
+      'Il peut soulever des éléments que tu n’as pas identifiés : c’est le jeu, pas une sanction.'
+    ],
+    source: 'D’après la page officielle de l’épreuve orale, Sciences Po Admissions.'
+  },
+  motivation: {
+    eyebrow: 'SÉQUENCE 3 · 10 À 15 MINUTES',
+    titre: 'Pourquoi toi, pourquoi ici.',
+    lead: 'Un échange libre sur ton projet, ton parcours et ta connaissance de Sciences Po.',
+    attentes: [
+      'Une connaissance concrète de la formation, du campus et des programmes visés.',
+      'Un projet cohérent avec ton parcours, et des éléments vérifiables pour l’étayer.',
+      'Une motivation personnelle : ce qu’un autre candidat ne pourrait pas dire à ta place.',
+      'La capacité à mener l’échange et à accueillir la contradiction sans se braquer.',
+      'Le jury peut s’appuyer sur ton dossier et ton projet motivé pour t’interroger.'
+    ],
+    source: 'D’après les modalités publiées par Sciences Po pour l’admission en Bachelor.'
+  }
 };
 
 var session = null;
 var voice = { listening:false, speaking:false, finalTranscript:'',
               manualStop:false, restarts:0, lastError:'' };
+
+var TOURS_ISOLES = { presentation:4, motivation:5 };
 
 function newSession(kind){
   return {
@@ -793,7 +856,8 @@ function newSession(kind){
 }
 
 function phaseLabel(){
-  var head = session.kind === 'oral' ? 'ORAL BLANC · ' : '';
+  var head = session.kind === 'oral' ? 'ORAL BLANC · ' : 'SÉQUENCE · ';
+  if(session.kind === 'culture' || session.kind === 'replay') head = '';
   return head + (PHASES[session.phase] ? PHASES[session.phase].label : '');
 }
 
@@ -889,6 +953,8 @@ function signalerMoteur(engine, imageEnvoyee){
 function processAnswer(raw){
   var analysis = analyzeAnswer(raw);
   var conf = PHASES[session.phase] || { maxTurns:3 };
+  var maxTurns = (session.flow.length === 1 && TOURS_ISOLES[session.phase])
+    ? TOURS_ISOLES[session.phase] : conf.maxTurns;
   var posees = [];
   for(var t=0;t<session.turns.length;t++) posees.push(session.turns[t].question);
   var ctx = {
@@ -912,7 +978,7 @@ function processAnswer(raw){
     });
     session.turn++;
 
-    var doitChanger = session.phaseExpired || session.turn >= conf.maxTurns;
+    var doitChanger = session.phaseExpired || session.turn >= maxTurns;
     clearTranscript();
 
     if(doitChanger){
@@ -1158,53 +1224,108 @@ function echapper(t){
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function afficherFicheLecture(fiche){
-  var obs = fiche.observes || [], man = fiche.manques || [],
-      lec = fiche.lectures || [], pie = fiche.pieges || [];
+/* Un schéma unique pour les trois séquences, des libellés propres à chacune. */
+var LIBELLES_COACH = {
+  image: {
+    carte: 'LECTURE DE L’IMAGE · LE COACH',
+    garde: 'Ce que tu as observé',
+    manques: 'Ce que tu n’as pas mentionné',
+    pistes: 'Lectures défendables',
+    appui: 'Appui visuel',
+    pieges: 'Pièges de cette image',
+    videGarde: 'Tu n’as pas encore décrit d’élément factuel : commence par là au prochain essai.'
+  },
+  presentation: {
+    carte: 'TA PRÉSENTATION · LE COACH',
+    garde: 'Ce que le jury retient de toi',
+    manques: 'Ce que ta présentation n’a pas donné',
+    pistes: 'Façons d’organiser tes deux minutes',
+    appui: 'Ce que ça change',
+    pieges: 'Ce qui affaiblit une présentation',
+    videGarde: 'Le jury ne retient encore rien de précis : nomme au moins une expérience ou une curiosité.'
+  },
+  motivation: {
+    carte: 'TES MOTIVATIONS · LE COACH',
+    garde: 'Ce qui rend ta motivation crédible',
+    manques: 'Ce qui manque pour convaincre',
+    pistes: 'Angles à creuser',
+    appui: 'La question à laquelle savoir répondre',
+    pieges: 'Ce qui sonne interchangeable',
+    videGarde: 'Rien dans tes réponses n’est encore personnel : c’est le premier point à travailler.'
+  }
+};
 
-  listeVers('lectureObserves', obs);
+function afficherFicheLecture(fiche, phase){
+  var lib = LIBELLES_COACH[phase] || LIBELLES_COACH.image;
+  var gar = fiche.garde || [], man = fiche.manques || [],
+      pis = fiche.pistes || [], pie = fiche.pieges || [];
+
+  setText('lectureTitre', lib.carte);
+  setText('titreGarde', lib.garde);
+  setText('titreManques', lib.manques);
+  setText('titrePistes', lib.pistes);
+  setText('titrePieges', lib.pieges);
+
+  listeVers('lectureObserves', gar);
   listeVers('lectureManques', man, 'manque');
   var html = '';
-  for(var i=0;i<lec.length;i++){
-    html += '<li>' + echapper(lec[i].lecture) +
-            (lec[i].appui ? '<i>Appui visuel : ' + echapper(lec[i].appui) + '</i>' : '') + '</li>';
+  for(var i=0;i<pis.length;i++){
+    html += '<li>' + echapper(pis[i].titre) +
+            (pis[i].appui ? '<i>' + lib.appui + ' : ' + echapper(pis[i].appui) + '</i>' : '') + '</li>';
   }
   setHTML('lectureLectures', html);
   listeVers('lecturePieges', pie);
 
-  showEl('blocObserves', obs.length > 0);
+  showEl('blocObserves', gar.length > 0);
   showEl('blocManques', man.length > 0);
-  showEl('blocLectures', lec.length > 0);
+  showEl('blocLectures', pis.length > 0);
   showEl('blocPieges', pie.length > 0);
 
-  if(!obs.length) setText('lectureEtat', 'Tu n’as pas encore décrit d’élément factuel : commence par là au prochain essai.');
+  if(!gar.length) setText('lectureEtat', lib.videGarde);
   else showEl('lectureEtat', false);
   showEl('lectureCorps', true);
 }
 
+/* Phase coachée : l'image si elle a porté sur un visuel réel, sinon la
+   séquence la plus travaillée de la séance. */
+function phaseACoacher(sess){
+  var image = sess.turns.filter(function(t){ return t.phase === 'image' && t.visuelReel; });
+  if(image.length) return 'image';
+  var compte = { presentation:0, motivation:0 };
+  for(var i=0;i<sess.turns.length;i++){
+    if(compte[sess.turns[i].phase] !== undefined) compte[sess.turns[i].phase]++;
+  }
+  if(compte.motivation >= compte.presentation && compte.motivation > 0) return 'motivation';
+  if(compte.presentation > 0) return 'presentation';
+  return '';
+}
+
 function demanderFicheLecture(sess){
-  var toursImage = sess.turns.filter(function(t){ return t.phase === 'image' && t.visuelReel; });
-  showEl('debriefLectureCard', toursImage.length > 0);
-  if(!toursImage.length) return;
+  var phase = phaseACoacher(sess);
+  var tours = phase ? sess.turns.filter(function(t){ return t.phase === phase; }) : [];
+  showEl('debriefLectureCard', tours.length > 0);
+  if(!tours.length) return;
 
   showEl('lectureCorps', false);
   showEl('lectureEtat', true);
+  setText('lectureTitre', (LIBELLES_COACH[phase] || LIBELLES_COACH.image).carte);
   setText('lectureEtat', 'Le coach relit la séance…');
 
   var ctx = {
-    image: ficheTransmise(sess.image),
-    turns: toursImage.map(function(t){ return { question:t.question, answer:t.answer }; })
+    phase: phase,
+    turns: tours.map(function(t){ return { question:t.question, answer:t.answer }; })
   };
+  if(phase === 'image' && sess.image) ctx.image = ficheTransmise(sess.image);
 
   askCoach(ctx).then(function(fiche){
-    afficherFicheLecture(fiche);
+    afficherFicheLecture(fiche, phase);
     /* conservée avec la séance : elle sera relisible plus tard */
     var enreg = state.sessions[state.sessions.length - 1];
-    if(enreg && enreg.id === 'sess-' + sess.startedAt){ enreg.lecture = fiche; save(); }
+    if(enreg && enreg.id === 'sess-' + sess.startedAt){ enreg.lecture = fiche; enreg.lecturePhase = phase; save(); }
   }).catch(function(e){
     showEl('lectureCorps', false);
     showEl('lectureEtat', true);
-    setText('lectureEtat', 'La fiche de lecture n’a pas pu être produite : ' + (e && e.message || e) + '.');
+    setText('lectureEtat', 'La fiche du coach n’a pas pu être produite : ' + (e && e.message || e) + '.');
   });
 }
 
@@ -1722,6 +1843,18 @@ function startSession(kind){
     enterPhase('image', "Vous avez choisi « " + session.image.titre + " ». Commencez par la décrire le plus précisément possible, sans l’interpréter.");
     return;
   }
+  if(kind === 'presentation'){
+    setText('oralPhase', phaseLabel());
+    showScreen('oral');
+    enterPhase('presentation', "Bonjour. Vous avez deux minutes pour vous présenter. Nous vous écoutons.");
+    return;
+  }
+  if(kind === 'motivation'){
+    setText('oralPhase', phaseLabel());
+    showScreen('oral');
+    enterPhase('motivation', "Pourquoi souhaitez-vous intégrer Sciences Po ?");
+    return;
+  }
   if(kind === 'culture'){
     setText('oralPhase', phaseLabel());
     showScreen('oral');
@@ -1975,6 +2108,29 @@ function setPeriod(days, btnId){
   renderProgress();
 }
 
+/* ---------- cadrage d'une séquence isolée ---------- */
+var sequenceCourante = '';
+
+function ouvrirSequence(nom){
+  var seq = SEQUENCES[nom];
+  if(!seq) return;
+  sequenceCourante = nom;
+  setText('seqEyebrow', seq.eyebrow);
+  setText('seqTitre', seq.titre);
+  setText('seqLead', seq.lead);
+  var html = '';
+  for(var i=0;i<seq.attentes.length;i++) html += '<li>' + echapper(seq.attentes[i]) + '</li>';
+  setHTML('seqAttentes', html);
+  setText('seqSource', seq.source);
+  setText('seqStart', nom === 'image' ? 'CHOISIR UNE IMAGE' : 'COMMENCER');
+  showScreen('sequence');
+}
+
+function lancerSequence(){
+  if(sequenceCourante === 'image'){ renderPair(); showScreen('image'); return; }
+  if(sequenceCourante) startSession(sequenceCourante);
+}
+
 /* ---------- culture ---------- */
 function renderCulture(){
   currentCultureQuestion = CULTURE_QUESTIONS[Math.floor(Math.random()*CULTURE_QUESTIONS.length)];
@@ -1988,11 +2144,15 @@ function bind(){
   on('todayBtn', function(){
     var b = $('todayBtn');
     var target = b ? b.getAttribute('data-target') : 'image';
-    if(target === 'image'){ renderPair(); showScreen('image'); }
+    if(target === 'image') ouvrirSequence('image');
     else startSession('oral');
   });
   on('tileOral', function(){ startSession('oral'); });
-  on('tileImage', function(){ renderPair(); showScreen('image'); });
+  on('tilePresentation', function(){ ouvrirSequence('presentation'); });
+  on('tileImage', function(){ ouvrirSequence('image'); });
+  on('tileMotivation', function(){ ouvrirSequence('motivation'); });
+  on('seqBack', function(){ showScreen('home'); });
+  on('seqStart', lancerSequence);
   on('tileCulture', function(){ renderCulture(); showScreen('culture'); });
   on('tileProgress', function(){ renderProgress(); showScreen('progress'); });
 
