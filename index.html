@@ -206,6 +206,34 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .lectureBloc li i{display:block;font-style:normal;font-size:11.5px;color:#7b8296;margin-top:3px}
 .lectureEtat{font-size:12px;color:var(--muted);line-height:1.5}
 
+/* Priorité du coach : première chose lue à l'ouverture, pas une note de bas de page. */
+.priorite{margin:22px 0 4px;padding:20px;border-radius:24px;position:relative;overflow:hidden;
+  background:linear-gradient(140deg,#f3f1ff 0%,#eceaff 55%,#e6e3ff 100%);
+  border:1px solid #ddd8ff;box-shadow:0 14px 38px rgba(98,92,255,.13)}
+.priorite:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;
+  right:-62px;top:-70px;background:radial-gradient(circle,rgba(98,92,255,.16),transparent 70%)}
+.prioriteTop{display:flex;align-items:center;gap:9px;position:relative;z-index:1}
+.prioriteTop b{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:850}
+.prioriteMark{width:24px;height:24px;flex:0 0 auto;border-radius:8px;background:var(--accent);color:#fff;
+  display:grid;place-items:center;font-size:12px;font-weight:900;box-shadow:0 6px 16px rgba(98,92,255,.35)}
+.prioriteTexte{position:relative;z-index:1;margin:13px 0 0;font-size:19px;line-height:1.36;
+  letter-spacing:-.018em;font-weight:700;color:#1b1c33}
+.prioriteVerdict{position:relative;z-index:1;margin:12px 0 0;padding-top:12px;border-top:1px solid rgba(98,92,255,.16);
+  font-size:12.5px;line-height:1.5;color:#4b4c6b}
+.prioriteVerdict b{display:block;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:#8b88b8;margin-bottom:4px;font-weight:850}
+.prioriteBas{position:relative;z-index:1;display:flex;align-items:center;gap:9px;margin-top:15px}
+.prioriteSource{font-size:10.5px;color:#6a6a91;margin-top:12px;position:relative;z-index:1}
+.prioriteAction{flex:1;border:0;border-radius:14px;background:var(--accent);color:#fff;padding:13px 14px;
+  font-size:11px;font-weight:850;letter-spacing:.07em;cursor:pointer;box-shadow:0 10px 22px rgba(98,92,255,.28)}
+.prioriteEcouter{flex:0 0 auto;border:1px solid #cfc9ff;background:rgba(255,255,255,.72);color:var(--accent);
+  border-radius:14px;padding:13px 15px;font-size:11px;font-weight:850;letter-spacing:.07em;cursor:pointer}
+.prioriteAction:active,.prioriteEcouter:active{transform:scale(.98)}
+/* Avant la première séance, l'encart n'a rien à dire : il se fait discret. */
+.priorite.vide{padding:15px 18px;box-shadow:none}
+.priorite.vide .prioriteTexte{font-size:15px;margin-top:10px}
+
+.lienClair{background:none;border:0;padding:12px 0 0;color:#7b8296;font-size:11.5px;text-decoration:underline;cursor:pointer;display:block;margin:0 auto}
+
 @media(min-width:700px){body{padding:20px}.app{min-height:calc(100vh - 40px);border-radius:34px;background:var(--bg);box-shadow:0 25px 100px rgba(30,34,70,.13)}}
 </style>
 </head>
@@ -220,6 +248,17 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
   <div class="eyebrow" id="dateLabel">—</div>
   <h1 id="homeTitle">Prêt pour<br>8 minutes ?</h1>
   <p class="lead">Un entraînement ciblé, construit autour de ta progression.</p>
+
+  <div class="priorite" id="prioriteCarte">
+    <div class="prioriteTop"><span class="prioriteMark">↗</span><b>Le coach · à travailler aujourd’hui</b></div>
+    <p class="prioriteTexte" id="priorityText">Répondre directement à la question avant de développer.</p>
+    <div class="prioriteVerdict hidden" id="prioriteVerdict"><b>Ce que le coach a retenu</b><span id="prioriteVerdictTexte"></span></div>
+    <div class="prioriteSource" id="prioriteSource">Point de départ · aucune séance encore</div>
+    <div class="prioriteBas hidden" id="prioriteBas">
+      <button class="prioriteAction" id="prioriteAction">TRAVAILLER ÇA</button>
+      <button class="prioriteEcouter" id="prioriteEcouter">ÉCOUTER</button>
+    </div>
+  </div>
 
   <div class="heroToday">
     <div class="heroMeta"><span class="pulseDot"></span><span id="todayMeta">Aujourd’hui · 8 min</span></div>
@@ -237,7 +276,6 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
     <button class="tile" id="tileProgress"><div class="tileTop"><div class="ico">↗</div><div class="arr">↗</div></div><div><b>Progression</b><span>Forces, angles morts, évolution</span></div></button>
   </div>
 
-  <div class="goal"><div class="goalRow"><div class="goalMark">✓</div><div>Priorité actuelle<strong id="priorityText">Répondre directement avant de développer.</strong></div></div></div>
 </section>
 
 <section id="oral" class="screen">
@@ -336,15 +374,16 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 
 <section id="culture" class="screen">
   <button class="back" id="cultureBack">← Accueil</button>
-  <div class="eyebrow">CULTURE &amp; IDÉES · 3 MIN</div>
+  <div class="eyebrow">CULTURE &amp; IDÉES · ENTRAÎNEMENT · 3 MIN</div>
   <h2 id="cultureQuestion">—</h2>
-  <p class="lead">Une position. Une limite. Un exemple. Pas besoin d’en faire davantage.</p>
-  <div class="challenge">
-    <div class="timer">03:00 · échange oral</div>
-    <p class="quote">« Commence par répondre. Les références ne valent que si elles servent ton idée. »</p>
-    <button class="btn accent" id="cultureBtn">RÉPONDRE À L’ORAL</button>
+  <p class="lead">Trois minutes pour prendre position, l’étayer, et en reconnaître la limite.</p>
+  <div class="card">
+    <div class="eyebrow">CE QUE CET EXERCICE ENTRAÎNE</div>
+    <ul class="lectureBloc" id="cultureAttentes"></ul>
+    <p class="note">Cette séquence ne figure pas dans l’oral d’admission. Elle entraîne la prise de position rapide, qui sert ensuite dans les motivations et devant une image.</p>
   </div>
-  <div class="goal"><div class="goalRow"><div class="goalMark">↯</div><div>Ce que le jury regarde<strong>Ta capacité à construire une position claire puis à la nuancer.</strong></div></div></div>
+  <button class="btn accent" id="cultureBtn">RÉPONDRE À L’ORAL</button>
+  <button class="lienClair" id="cultureAutre">une autre question</button>
 </section>
 
 <section id="progress" class="screen">
@@ -1309,6 +1348,7 @@ var LIBELLES_COACH = {
 /* Le verdict produit par le coach remplace celui des heuristiques : cinq
    phrases écrites en dur ne peuvent pas décrire une séance particulière. */
 function appliquerVerdictCoach(fiche){
+  if(!fiche.verdict && !fiche.priorite){ restaurerDebriefLocal(); return; }
   if(fiche.verdict) setText('debriefTitle', fiche.verdict);
   if(fiche.force) setText('debriefStrength', fiche.force);
   if(fiche.priorite){
@@ -1366,11 +1406,43 @@ function phaseACoacher(sess){
   return '';
 }
 
+/* Verdict local conservé : il sert d'attente et de filet, jamais de résultat
+   qu'on remplacerait ensuite sans prévenir. */
+var debriefLocal = null;
+
+function memoriserDebriefLocal(){
+  debriefLocal = {
+    titre: ($('debriefTitle') || {}).textContent || '',
+    tag: ($('debriefTag') || {}).textContent || '',
+    force: ($('debriefStrength') || {}).textContent || '',
+    force2: ($('debriefStrength2') || {}).textContent || '',
+    improve: ($('debriefImprove') || {}).textContent || ''
+  };
+}
+function restaurerDebriefLocal(){
+  if(!debriefLocal) return;
+  setText('debriefTitle', debriefLocal.titre);
+  setText('debriefTag', debriefLocal.tag);
+  setText('debriefStrength', debriefLocal.force);
+  setText('debriefStrength2', debriefLocal.force2);
+  setText('debriefImprove', debriefLocal.improve);
+}
+function debriefEnAttente(){
+  setText('debriefTitle', 'Le coach relit ta séance…');
+  setText('debriefTag', 'analyse en cours');
+  setText('debriefStrength', 'Quelques secondes : le coach reprend l’échange pour en tirer ce qui compte.');
+  setText('debriefStrength2', '');
+  setText('debriefImprove', '');
+}
+
 function demanderFicheLecture(sess){
   var phase = phaseACoacher(sess);
   var tours = phase ? sess.turns.filter(function(t){ return t.phase === phase; }) : [];
   showEl('debriefLectureCard', tours.length > 0);
   if(!tours.length) return;
+
+  memoriserDebriefLocal();
+  debriefEnAttente();
 
   showEl('lectureCorps', false);
   showEl('lectureEtat', true);
@@ -1384,9 +1456,8 @@ function demanderFicheLecture(sess){
   if(phase === 'image' && sess.image) ctx.image = ficheTransmise(sess.image);
 
   askCoach(ctx).then(function(fiche){
-    afficherFicheLecture(fiche, phase);
-    appliquerVerdictCoach(fiche);
-    /* conservée avec la séance : elle sera relisible plus tard */
+    /* Enregistrer AVANT d'appliquer le verdict : appliquerVerdictCoach
+       rafraîchit l'accueil, qui lit la fiche sur la séance enregistrée. */
     var enreg = state.sessions[state.sessions.length - 1];
     if(enreg && enreg.id === 'sess-' + sess.startedAt){
       enreg.lecture = fiche;
@@ -1394,7 +1465,10 @@ function demanderFicheLecture(sess){
       if(fiche.axe) enreg.axe = fiche.axe;
       save();
     }
+    afficherFicheLecture(fiche, phase);
+    appliquerVerdictCoach(fiche);
   }).catch(function(e){
+    restaurerDebriefLocal();
     showEl('lectureCorps', false);
     showEl('lectureEtat', true);
     setText('lectureEtat', 'La fiche du coach n’a pas pu être produite : ' + (e && e.message || e) + '.');
@@ -2124,6 +2198,20 @@ function renderHome(){
   setText('avatarInitial', (state.prenom || 'P').charAt(0).toUpperCase());
   setText('priorityText', state.priority);
 
+  /* La carte ne prend de la place que lorsqu'elle a quelque chose à dire. */
+  var derniere = state.sessions.length ? state.sessions[state.sessions.length-1] : null;
+  var carte = $('prioriteCarte');
+  if(carte) carte.classList.toggle('vide', !derniere);
+  showEl('prioriteBas', !!derniere);
+  showEl('prioriteVerdict', !!(derniere && derniere.lecture && derniere.lecture.verdict));
+  if(derniere && derniere.lecture && derniere.lecture.verdict){
+    setText('prioriteVerdictTexte', derniere.lecture.verdict);
+  }
+  setText('prioriteSource', derniere
+    ? 'Issu de ta séance du ' + new Date(derniere.date).toLocaleDateString('fr-FR')
+    : 'Point de départ · aucune séance encore');
+  setText('prioriteAction', 'TRAVAILLER ' + LIBELLE_CIBLE[cibleDePriorite()]);
+
   /* séance du jour : alternance simple pilotée par la priorité courante */
   var last = state.sessions.length ? state.sessions[state.sessions.length-1] : null;
   var suggere = (!last || last.kind === 'image') ? 'oral' : 'image';
@@ -2140,6 +2228,21 @@ function renderHome(){
   }
   var b = $('todayBtn');
   if(b) b.setAttribute('data-target', suggere);
+}
+
+/* Un conseil qu'on ne peut pas suivre immédiatement reste décoratif : l'axe
+   choisi par le coach détermine la séquence à ouvrir. */
+var AXE_VERS_SEQUENCE = {
+  observation:'image', interpretation:'image',
+  personnalisation:'presentation', structure:'presentation',
+  preuve:'motivation', nuance:'motivation', concision:'motivation', echange:'motivation'
+};
+var LIBELLE_CIBLE = { image:'L’IMAGE', presentation:'LA PRÉSENTATION', motivation:'LES MOTIVATIONS' };
+
+function cibleDePriorite(){
+  var derniere = state.sessions.length ? state.sessions[state.sessions.length-1] : null;
+  var axe = derniere && derniere.axe;
+  return AXE_VERS_SEQUENCE[axe] || 'image';
 }
 
 /* ---------- défi image ---------- */
@@ -2345,9 +2448,24 @@ function lancerSequence(){
 }
 
 /* ---------- culture ---------- */
+var ATTENTES_CULTURE = [
+  'Prends position dès la première phrase : on doit savoir ce que tu défends.',
+  'Une raison, puis un exemple précis. Mieux vaut un argument tenu que trois survolés.',
+  'Nomme toi-même la limite de ta position avant qu’on te l’oppose.',
+  'Trois minutes, c’est court : c’est précisément ce qu’on travaille.'
+];
+
 function renderCulture(){
-  currentCultureQuestion = CULTURE_QUESTIONS[Math.floor(Math.random()*CULTURE_QUESTIONS.length)];
+  var precedente = currentCultureQuestion;
+  var choix = CULTURE_QUESTIONS;
+  if(CULTURE_QUESTIONS.length > 1 && precedente){
+    choix = CULTURE_QUESTIONS.filter(function(q){ return q !== precedente; });
+  }
+  currentCultureQuestion = choix[Math.floor(Math.random()*choix.length)];
   setText('cultureQuestion', currentCultureQuestion);
+  var html = '';
+  for(var i=0;i<ATTENTES_CULTURE.length;i++) html += '<li>' + echapper(ATTENTES_CULTURE[i]) + '</li>';
+  setHTML('cultureAttentes', html);
 }
 
 /* ============================================================
@@ -2361,6 +2479,13 @@ function bind(){
     else startSession('oral');
   });
   on('tileOral', function(){ startSession('oral'); });
+  on('prioriteAction', function(){ ouvrirSequence(cibleDePriorite()); });
+  on('prioriteEcouter', function(){
+    deverrouillerAudio();
+    setText('prioriteEcouter', 'LECTURE…');
+    speak(state.priority);
+    setTimeout(function(){ setText('prioriteEcouter', 'ÉCOUTER'); }, 1200);
+  });
   on('tilePresentation', function(){ ouvrirSequence('presentation'); });
   on('tileImage', function(){ ouvrirSequence('image'); });
   on('tileMotivation', function(){ ouvrirSequence('motivation'); });
@@ -2395,6 +2520,7 @@ function bind(){
 
   on('cultureBack', function(){ clockStop(); showScreen('home'); });
   on('cultureBtn', function(){ startSession('culture'); });
+  on('cultureAutre', renderCulture);
 
   on('progressBack', function(){ showScreen('home'); });
   on('period7', function(){ setPeriod(7,'period7'); });
