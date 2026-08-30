@@ -920,7 +920,7 @@ function advancePhase(){
 /* Étape de la séquence image, décidée par l'orchestrateur et imposée au jury.
    Sans elle, le modèle redemandait indéfiniment de décrire et la séquence
    n'atteignait jamais l'interprétation que l'épreuve exige. */
-var OBSERVATION_SUFFISANTE = 4;
+var OBSERVATION_SUFFISANTE = 3;
 
 function etapeImage(analysisCourante){
   var obs = 0, n = 0, franchies = 0;
@@ -1293,6 +1293,21 @@ var LIBELLES_COACH = {
   }
 };
 
+/* Le verdict produit par le coach remplace celui des heuristiques : cinq
+   phrases écrites en dur ne peuvent pas décrire une séance particulière. */
+function appliquerVerdictCoach(fiche){
+  if(fiche.verdict) setText('debriefTitle', fiche.verdict);
+  if(fiche.force) setText('debriefStrength', fiche.force);
+  if(fiche.priorite){
+    setText('debriefImprove', fiche.priorite);
+    state.priority = fiche.priorite;
+    save();
+    renderHome();
+  }
+  if(fiche.axe) setText('debriefTag', 'priorité : ' + fiche.axe);
+  if(fiche.verdict || fiche.priorite) setText('debriefStrength2', '');
+}
+
 function afficherFicheLecture(fiche, phase){
   var lib = LIBELLES_COACH[phase] || LIBELLES_COACH.image;
   var gar = fiche.garde || [], man = fiche.manques || [],
@@ -1357,9 +1372,15 @@ function demanderFicheLecture(sess){
 
   askCoach(ctx).then(function(fiche){
     afficherFicheLecture(fiche, phase);
+    appliquerVerdictCoach(fiche);
     /* conservée avec la séance : elle sera relisible plus tard */
     var enreg = state.sessions[state.sessions.length - 1];
-    if(enreg && enreg.id === 'sess-' + sess.startedAt){ enreg.lecture = fiche; enreg.lecturePhase = phase; save(); }
+    if(enreg && enreg.id === 'sess-' + sess.startedAt){
+      enreg.lecture = fiche;
+      enreg.lecturePhase = phase;
+      if(fiche.axe) enreg.axe = fiche.axe;
+      save();
+    }
   }).catch(function(e){
     showEl('lectureCorps', false);
     showEl('lectureEtat', true);
