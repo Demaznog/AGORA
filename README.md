@@ -309,6 +309,33 @@ Un message qui masque le code rend le défaut indiagnosticable à distance.
 Les erreurs non fatales n'apparaissent pas pendant les relances automatiques,
 seulement une fois la réponse close.
 
+## Voix neuronale
+
+Route `POST /voix` du Worker. Elle relaie le flux audio **sans le traiter** :
+aucun décodage, aucun encodage, donc aucun risque de dépasser le budget de
+calcul du palier gratuit.
+
+Trois secrets et deux variables à ajouter dans Cloudflare :
+
+```
+Secret : ELEVENLABS_API_KEY
+Text   : ELEVENLABS_VOICE_ID      identifiant de la voix choisie
+Text   : ELEVENLABS_MODEL         défaut eleven_flash_v2_5
+Text   : ELEVENLABS_FORMAT        défaut mp3_44100_64
+```
+
+Côté client, `config.js` porte `voixNeurale: true`. La bascule est
+automatique : relais configuré et réseau disponible, le jury parle avec la voix
+neuronale ; sinon la voix du navigateur prend le relais. Toute panne est
+annoncée au candidat avec son motif, jamais silencieuse.
+
+**Déverrouillage iOS.** Safari n'autorise la lecture audio qu'après un geste de
+l'utilisateur. Un élément audio unique est déverrouillé au premier appui, sur le
+micro ou sur le lancement d'une séance, puis réutilisé pour toute la séance.
+
+En voix neuronale, l'énoncé part **entier** : le découpage en segments ne sert
+qu'à la voix du navigateur, dont le phrasé est trop plat pour une longue phrase.
+
 ## Phrasé du jury
 
 `speak()` découpe l'énoncé sur la ponctuation forte et prononce les phrases

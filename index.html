@@ -1629,23 +1629,144 @@ function splitSpeech(text){
 
 var speechToken = 0;
 
+/* ============================================================
+   VOIX NEURONALE
+   Safari n'autorise la lecture audio qu'après un geste de l'utilisateur.
+   On déverrouille donc un élément audio unique au premier appui, et on
+   le réutilise pour tous les énoncés de la séance.
+   ============================================================ */
+var audioJury = null;
+var audioDeverrouille = false;
+var SILENCE = 'data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA';
+
+function preparerAudio(){
+  if(audioJury) return audioJury;
+  try {
+    audioJury = new Audio();
+    audioJury.preload = 'auto';
+  } catch(e){ audioJury = null; }
+  return audioJury;
+}
+
+/* Appelé depuis un geste utilisateur : c'est la seule fenêtre où iOS
+   accepte de débloquer la lecture. */
+function deverrouillerAudio(){
+  if(audioDeverrouille) return;
+  var a = preparerAudio();
+  if(!a) return;
+  try {
+    a.src = SILENCE;
+    var p = a.play();
+    if(p && typeof p.then === 'function'){
+      p.then(function(){ audioDeverrouille = true; try { a.pause(); } catch(e){} })
+       .catch(function(){});
+    } else { audioDeverrouille = true; }
+  } catch(e){}
+}
+
+function voixNeuraleActive(){
+  var reseau = false;
+  try { reseau = (typeof fetch === 'function'); } catch(e){ reseau = false; }
+  return !!(RELAY_URL && reseau && CFG.voixNeurale !== false);
+}
+
+function direAvecRelais(texte, token){
+  var a = preparerAudio();
+  if(!a) return Promise.reject(new Error('audio indisponible'));
+  if(typeof fetch !== 'function') return Promise.reject(new Error('réseau indisponible'));
+
+  var controleur = null, minuteur = null;
+  try { controleur = new AbortController(); } catch(e){ controleur = null; }
+  if(controleur) minuteur = setTimeout(function(){ try { controleur.abort(); } catch(e){} }, 12000);
+
+  var options = {
+    method:'POST',
+    headers:{ 'content-type':'application/json', 'x-agora-token': RELAY_TOKEN },
+    body: JSON.stringify({ texte: texte })
+  };
+  if(controleur) options.signal = controleur.signal;
+
+  return fetch(RELAY_URL.replace(/\/jury$/, '/voix'), options).then(function(r){
+    if(minuteur) clearTimeout(minuteur);
+    if(!r.ok){
+      return r.text().then(function(brut){
+        var m = brut;
+        try { m = (JSON.parse(brut).error) || brut; } catch(e){}
+        throw new Error(String(m).slice(0, 120));
+      });
+    }
+    return r.blob();
+  }).then(function(blob){
+    if(token !== speechToken) throw new Error('énoncé annulé');
+    return new Promise(function(resoudre, rejeter){
+      var url = URL.createObjectURL(blob);
+      function nettoyer(){ try { URL.revokeObjectURL(url); } catch(e){} }
+      a.onended = function(){ nettoyer(); resoudre(); };
+      a.onerror = function(){ nettoyer(); rejeter(new Error('lecture audio impossible')); };
+      a.src = url;
+      var p = a.play();
+      if(p && typeof p.then === 'function') p.catch(function(e){ nettoyer(); rejeter(e); });
+    });
+  });
+}
+
 function speak(text){
-  var ok = false;
-  try { ok = ('speechSynthesis' in window); } catch(e){ ok = false; }
-  if(!ok){ readyToSpeak(); return; }
   var segments = (state.phrasing === 'continu')
     ? [{ text: String(text || ''), pause: 0 }]
     : splitSpeech(text);
   if(!segments.length){ readyToSpeak(); return; }
 
+  /* La voix du navigateur n'est qu'un filet : son absence ne doit pas
+     empêcher d'essayer la voix neuronale du relais. */
+  var navigateurParle = false;
+  try { navigateurParle = ('speechSynthesis' in window); } catch(e){ navigateurParle = false; }
+  if(!navigateurParle && !voixNeuraleActive()){ readyToSpeak(); return; }
+
   speechToken++;
   var token = speechToken;
-  try { window.speechSynthesis.cancel(); } catch(e){}
+  try { if(navigateurParle) window.speechSynthesis.cancel(); } catch(e){}
   voice.speaking = true;
   setVoiceState('speaking','le jury parle');
   setMic(false,'ÉCOUTE LE JURY');
+
+  /* Voix neuronale d'abord ; la voix du navigateur reste le filet. */
+  if(voixNeuraleActive()){
+    var lecture;
+    /* un throw synchrone ici couperait la parole du jury pour toute la séance */
+    try { lecture = direAvecRelais(String(text || ''), token); }
+    catch(e){ lecture = Promise.reject(e); }
+    if(!lecture || typeof lecture.then !== 'function') lecture = Promise.reject(new Error('voix injoignable'));
+    lecture.then(function(){
+      if(token !== speechToken) return;
+      voice.speaking = false;
+      readyToSpeak();
+    }).catch(function(e){
+      if(token !== speechToken) return;
+      derniereVoixErreur = String(e && e.message || e);
+      signalerVoix(false);
+      /* repli immédiat sur la voix du navigateur, s'il en a une */
+      if(!navigateurParle){ voice.speaking = false; readyToSpeak(); return; }
+      speechToken++;
+      var jeton = speechToken;
+      if(!frenchVoice && !frenchVoices.length) loadVoices();
+      sayNext(segments, 0, jeton);
+    });
+    return;
+  }
+
   if(!frenchVoice && !frenchVoices.length) loadVoices();
   sayNext(segments, 0, token);
+}
+
+var derniereVoixErreur = '';
+
+function signalerVoix(ok){
+  var e = $('voiceError');
+  if(!e) return;
+  if(ok){ e.className = 'voiceError'; e.innerHTML = ''; return; }
+  e.className = 'voiceError show';
+  e.innerHTML = '<b>Voix de secours :</b> la voix neuronale n’a pas répondu (' +
+                (derniereVoixErreur || 'motif inconnu') + '). Le jury parle avec la voix du navigateur.';
 }
 
 function sayNext(segments, i, token){
@@ -1674,6 +1795,7 @@ function sayNext(segments, i, token){
 function stopVoice(){
   speechToken++;
   voice.manualStop = true;          /* coupe toute relance automatique d'écoute */
+  try { if(audioJury){ audioJury.pause(); audioJury.removeAttribute('src'); } } catch(e){}
   try { if('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch(e){}
   try { if(recognition) { if(recognition.abort) recognition.abort(); else recognition.stop(); } } catch(e){}
   voice.listening = false; voice.speaking = false;
@@ -1815,6 +1937,7 @@ function finirEcoute(fatale){
 }
 
 function toggleListening(){
+  deverrouillerAudio();
   if(!session){ startSession('oral'); return; }
   if(voice.speaking) return;
 
@@ -1863,6 +1986,7 @@ function showOralVisual(visible){
 }
 
 function startSession(kind){
+  deverrouillerAudio();
   clockStop();
   stopVoice();
   session = newSession(kind);

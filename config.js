@@ -15,10 +15,14 @@ window.AGORA_CONFIG = {
   /* Doit être identique au secret AGORA_TOKEN du Worker.
      Ce n'est pas un secret de sécurité : il est lisible dans la page.
      Il empêche seulement l'usage fortuit du relais par un tiers. */
-  relayToken: 'ZERTGHUIOPTR2345809RTGDSZKL865',
+  relayToken: 'REMPLACER_PAR_AGORA_TOKEN',
 
   /* Délai au-delà duquel AGORA retombe sur son moteur local, en ms. */
   relayTimeout: 9000,
+
+  /* Voix neuronale du jury, servie par la route /voix du Worker.
+     Passer à false pour revenir à la voix du navigateur. */
+  voixNeurale: true,
 
   /* Prénom du candidat, utilisé à l'accueil. */
   prenom: 'Pierre'
