@@ -36,7 +36,6 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .heroToday:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;border:1px solid rgba(255,255,255,.12);right:-65px;bottom:-70px}
 .heroMeta{display:flex;align-items:center;gap:7px;font-size:11px;text-transform:uppercase;letter-spacing:.11em;color:#c7c9d8;font-weight:750}
 .pulseDot{width:7px;height:7px;border-radius:50%;background:#8a84ff;box-shadow:0 0 0 7px rgba(138,132,255,.12)}
-.heroToday h2{font-size:32px;max-width:330px;margin:28px 0 11px;color:white}
 .heroToday p{max-width:360px;color:#c9ccdb;font-size:14px;line-height:1.5;margin:0 0 24px}
 .btn{border:0;border-radius:17px;background:var(--dark);color:#fff;padding:15px 18px;width:100%;font-weight:780;font-size:13px;letter-spacing:.045em;cursor:pointer;transition:.18s transform,.18s opacity,.18s box-shadow}
 .btn:active{transform:scale(.985)}
@@ -45,11 +44,11 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .btn[disabled]{opacity:.45;cursor:default}
 .heroToday .btn{background:white;color:var(--dark);box-shadow:none}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px}
-.tile{border:1px solid var(--line);background:rgba(255,255,255,.86);backdrop-filter:blur(8px);border-radius:22px;padding:17px;text-align:left;min-height:124px;cursor:pointer;box-shadow:0 8px 30px rgba(34,38,74,.04);display:flex;flex-direction:column;justify-content:space-between}
+.tile{border:1px solid var(--line);background:rgba(255,255,255,.86);backdrop-filter:blur(8px);border-radius:22px;padding:15px;text-align:left;min-height:104px;cursor:pointer;box-shadow:0 8px 30px rgba(34,38,74,.04);display:flex;flex-direction:column;justify-content:space-between}
 .tileTop{display:flex;align-items:center;justify-content:space-between}
 .ico{width:35px;height:35px;border-radius:12px;background:#f0efff;color:var(--accent);display:grid;place-items:center;font-size:16px;font-weight:850}
 .arr{color:#b3b7c8;font-size:18px}
-.tile b{font-size:15px;display:block;margin-top:17px}
+.tile b{font-size:14px;display:block;margin-top:12px}
 .tile span{font-size:11.5px;line-height:1.35;color:var(--muted);display:block;margin-top:5px}
 .goal{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px 18px;margin-top:16px;color:var(--muted);font-size:12px;box-shadow:0 8px 30px rgba(34,38,74,.035)}
 .goal strong{display:block;color:var(--ink);font-size:14px;margin-top:5px;line-height:1.45}
@@ -206,31 +205,20 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .lectureBloc li i{display:block;font-style:normal;font-size:11.5px;color:#7b8296;margin-top:3px}
 .lectureEtat{font-size:12px;color:var(--muted);line-height:1.5}
 
-/* Priorité du coach : première chose lue à l'ouverture, pas une note de bas de page. */
-.priorite{margin:22px 0 4px;padding:20px;border-radius:24px;position:relative;overflow:hidden;
-  background:linear-gradient(140deg,#f3f1ff 0%,#eceaff 55%,#e6e3ff 100%);
-  border:1px solid #ddd8ff;box-shadow:0 14px 38px rgba(98,92,255,.13)}
-.priorite:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;
-  right:-62px;top:-70px;background:radial-gradient(circle,rgba(98,92,255,.16),transparent 70%)}
-.prioriteTop{display:flex;align-items:center;gap:9px;position:relative;z-index:1}
-.prioriteTop b{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:850}
-.prioriteMark{width:24px;height:24px;flex:0 0 auto;border-radius:8px;background:var(--accent);color:#fff;
-  display:grid;place-items:center;font-size:12px;font-weight:900;box-shadow:0 6px 16px rgba(98,92,255,.35)}
-.prioriteTexte{position:relative;z-index:1;margin:13px 0 0;font-size:19px;line-height:1.36;
-  letter-spacing:-.018em;font-weight:700;color:#1b1c33}
-.prioriteVerdict{position:relative;z-index:1;margin:12px 0 0;padding-top:12px;border-top:1px solid rgba(98,92,255,.16);
-  font-size:12.5px;line-height:1.5;color:#4b4c6b}
-.prioriteVerdict b{display:block;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:#8b88b8;margin-bottom:4px;font-weight:850}
-.prioriteBas{position:relative;z-index:1;display:flex;align-items:center;gap:9px;margin-top:15px}
-.prioriteSource{font-size:10.5px;color:#6a6a91;margin-top:12px;position:relative;z-index:1}
-.prioriteAction{flex:1;border:0;border-radius:14px;background:var(--accent);color:#fff;padding:13px 14px;
-  font-size:11px;font-weight:850;letter-spacing:.07em;cursor:pointer;box-shadow:0 10px 22px rgba(98,92,255,.28)}
-.prioriteEcouter{flex:0 0 auto;border:1px solid #cfc9ff;background:rgba(255,255,255,.72);color:var(--accent);
-  border-radius:14px;padding:13px 15px;font-size:11px;font-weight:850;letter-spacing:.07em;cursor:pointer}
-.prioriteAction:active,.prioriteEcouter:active{transform:scale(.98)}
-/* Avant la première séance, l'encart n'a rien à dire : il se fait discret. */
-.priorite.vide{padding:15px 18px;box-shadow:none}
-.priorite.vide .prioriteTexte{font-size:15px;margin-top:10px}
+/* Un seul appel à l'action principal : la recommandation du coach. Le reste
+   de l'écran est explicitement secondaire. */
+.accueilTete{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 0}
+.accueilEtat{font:inherit;font-size:11.5px;letter-spacing:.02em;color:#4e5568;font-weight:750;
+  background:#eef0f7;border:1px solid #e0e3ee;border-radius:999px;padding:7px 12px;cursor:pointer}
+.accueilEtat:active{transform:scale(.98)}
+.heroToday h2{font-size:27px;max-width:340px;margin:24px 0 11px;color:white;line-height:1.18}
+.heroEcouter{display:block;margin:12px auto 0;background:none;border:0;color:#a8abc6;font-size:11.5px;
+  text-decoration:underline;cursor:pointer;padding:4px}
+.sectionAutre{display:flex;align-items:center;gap:12px;margin:28px 0 2px}
+.sectionAutre span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#565d72;font-weight:850;white-space:nowrap}
+.sectionAutre:after{content:"";flex:1;height:1px;background:#dcdfeb}
+
+
 
 .lienClair{background:none;border:0;padding:12px 0 0;color:#7b8296;font-size:11.5px;text-decoration:underline;cursor:pointer;display:block;margin:0 auto}
 
@@ -241,30 +229,25 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 <main class="app">
 <header class="top">
   <div class="brand">AGORA<span>.</span></div>
-  <div class="profile"><span id="streakLabel">1re séance</span><div class="avatar" id="avatarInitial">P</div></div>
+  <div class="profile"><div class="avatar" id="avatarInitial">P</div></div>
 </header>
 
 <section id="home" class="screen active">
-  <div class="eyebrow" id="dateLabel">—</div>
-  <h1 id="homeTitle">Prêt pour<br>8 minutes ?</h1>
-  <p class="lead">Un entraînement ciblé, construit autour de ta progression.</p>
-
-  <div class="priorite" id="prioriteCarte">
-    <div class="prioriteTop"><span class="prioriteMark">↗</span><b>Le coach · à travailler aujourd’hui</b></div>
-    <p class="prioriteTexte" id="priorityText">Répondre directement à la question avant de développer.</p>
-    <div class="prioriteVerdict hidden" id="prioriteVerdict"><b>Ce que le coach a retenu</b><span id="prioriteVerdictTexte"></span></div>
-    <div class="prioriteSource" id="prioriteSource">Point de départ · aucune séance encore</div>
-    <div class="prioriteBas hidden" id="prioriteBas">
-      <button class="prioriteAction" id="prioriteAction">TRAVAILLER ÇA</button>
-      <button class="prioriteEcouter" id="prioriteEcouter">ÉCOUTER</button>
-    </div>
+  <div class="accueilTete">
+    <span class="eyebrow" id="dateLabel">—</span>
+    <button class="accueilEtat" id="tileProgress">—</button>
   </div>
 
   <div class="heroToday">
-    <div class="heroMeta"><span class="pulseDot"></span><span id="todayMeta">Aujourd’hui · 8 min</span></div>
-    <h2 id="todayTitle">Voir juste avant d’interpréter.</h2>
-    <p id="todayDesc">Deux images. Une lecture. Puis le jury vient tester ton raisonnement.</p>
-    <button class="btn" id="todayBtn">LANCER LA SÉANCE</button>
+    <div class="heroMeta"><span class="pulseDot"></span><span id="todayMeta">Première séance</span></div>
+    <h2 id="priorityText">Répondre directement à la question avant de développer.</h2>
+    <p id="todayDesc">Cette consigne est un point de départ. Dès ta première séance, le coach la remplacera par une priorité tirée de ce que tu auras dit.</p>
+    <button class="btn" id="todayBtn">COMMENCER</button>
+    <button class="heroEcouter" id="prioriteEcouter">Écouter la consigne</button>
+  </div>
+
+  <div class="sectionAutre">
+    <span>Ou travailler autre chose</span>
   </div>
 
   <div class="grid">
@@ -273,7 +256,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
     <button class="tile" id="tileImage"><div class="tileTop"><div class="ico">❷</div><div class="arr">↗</div></div><div><b>Défi image</b><span>Décrire, interpréter · séquence 2</span></div></button>
     <button class="tile" id="tileMotivation"><div class="tileTop"><div class="ico">❸</div><div class="arr">↗</div></div><div><b>Motivations</b><span>Projet, cohérence · séquence 3</span></div></button>
     <button class="tile" id="tileCulture"><div class="tileTop"><div class="ico">↯</div><div class="arr">↗</div></div><div><b>Culture &amp; idées</b><span>Réfléchir vite, argumenter mieux</span></div></button>
-    <button class="tile" id="tileProgress"><div class="tileTop"><div class="ico">↗</div><div class="arr">↗</div></div><div><b>Progression</b><span>Forces, angles morts, évolution</span></div></button>
+
   </div>
 
 </section>
@@ -2193,41 +2176,32 @@ function renderHome(){
   var now = new Date();
   setText('dateLabel', jours[now.getDay()] + ' ' + now.getDate() + ' ' + mois[now.getMonth()]);
 
-  var streak = computeStreak();
-  setText('streakLabel', state.sessions.length === 0 ? '1re séance' : (streak > 1 ? streak + ' jours' : state.sessions.length + ' séances'));
   setText('avatarInitial', (state.prenom || 'P').charAt(0).toUpperCase());
-  setText('priorityText', state.priority);
 
-  /* La carte ne prend de la place que lorsqu'elle a quelque chose à dire. */
+  var minutes = state.sessions.length
+    ? Math.round(state.sessions.reduce(function(n,x){ return n + (x.durationSec||0); },0)/60)
+    : 0;
+  var serie = computeStreak();
+  var etat = state.sessions.length + ' séance' + (state.sessions.length>1?'s':'') + ' · ' + minutes + ' min d’oral';
+  if(serie > 1) etat += ' · ' + serie + ' jours de suite';
+  setText('tileProgress', state.sessions.length === 0 ? 'Première séance' : etat);
+
+  /* Une seule recommandation, celle du coach. La carte du jour et l'encart de
+     priorité disaient la même chose par deux logiques concurrentes. */
   var derniere = state.sessions.length ? state.sessions[state.sessions.length-1] : null;
-  var carte = $('prioriteCarte');
-  if(carte) carte.classList.toggle('vide', !derniere);
-  showEl('prioriteBas', !!derniere);
-  showEl('prioriteVerdict', !!(derniere && derniere.lecture && derniere.lecture.verdict));
-  if(derniere && derniere.lecture && derniere.lecture.verdict){
-    setText('prioriteVerdictTexte', derniere.lecture.verdict);
-  }
-  setText('prioriteSource', derniere
-    ? 'Issu de ta séance du ' + new Date(derniere.date).toLocaleDateString('fr-FR')
-    : 'Point de départ · aucune séance encore');
-  setText('prioriteAction', 'TRAVAILLER ' + LIBELLE_CIBLE[cibleDePriorite()]);
+  var cible = cibleDePriorite();
 
-  /* séance du jour : alternance simple pilotée par la priorité courante */
-  var last = state.sessions.length ? state.sessions[state.sessions.length-1] : null;
-  var suggere = (!last || last.kind === 'image') ? 'oral' : 'image';
-  if(state.sessions.length === 0) suggere = 'image';
+  setText('priorityText', state.priority);
+  setText('todayMeta', derniere
+    ? 'Le coach · à travailler aujourd’hui'
+    : 'Par où commencer');
+  setText('todayDesc', (derniere && derniere.lecture && derniere.lecture.verdict)
+    ? derniere.lecture.verdict
+    : 'Cette consigne est un point de départ. Dès ta première séance, le coach la remplacera par une priorité tirée de ce que tu auras dit.');
+  setText('todayBtn', 'COMMENCER · ' + LIBELLE_CIBLE[cible] + ' · ' + DUREE_CIBLE[cible]);
 
-  if(suggere === 'image'){
-    setText('todayMeta','Aujourd’hui · 8 min');
-    setText('todayTitle','Voir juste avant d’interpréter.');
-    setText('todayDesc','Deux images. Une lecture. Puis le jury vient tester ton raisonnement.');
-  } else {
-    setText('todayMeta','Aujourd’hui · 10 min');
-    setText('todayTitle','Se présenter, puis tenir la contradiction.');
-    setText('todayDesc','Deux minutes de présentation, puis les motivations. Le jury rebondit sur ce que tu dis.');
-  }
   var b = $('todayBtn');
-  if(b) b.setAttribute('data-target', suggere);
+  if(b) b.setAttribute('data-target', cible);
 }
 
 /* Un conseil qu'on ne peut pas suivre immédiatement reste décoratif : l'axe
@@ -2237,7 +2211,8 @@ var AXE_VERS_SEQUENCE = {
   personnalisation:'presentation', structure:'presentation',
   preuve:'motivation', nuance:'motivation', concision:'motivation', echange:'motivation'
 };
-var LIBELLE_CIBLE = { image:'L’IMAGE', presentation:'LA PRÉSENTATION', motivation:'LES MOTIVATIONS' };
+var LIBELLE_CIBLE = { image:'DÉFI IMAGE', presentation:'PRÉSENTATION', motivation:'MOTIVATIONS' };
+var DUREE_CIBLE = { image:'8 MIN', presentation:'5 MIN', motivation:'8 MIN' };
 
 function cibleDePriorite(){
   var derniere = state.sessions.length ? state.sessions[state.sessions.length-1] : null;
@@ -2474,12 +2449,9 @@ function renderCulture(){
 function bind(){
   on('todayBtn', function(){
     var b = $('todayBtn');
-    var target = b ? b.getAttribute('data-target') : 'image';
-    if(target === 'image') ouvrirSequence('image');
-    else startSession('oral');
+    ouvrirSequence((b && b.getAttribute('data-target')) || 'image');
   });
   on('tileOral', function(){ startSession('oral'); });
-  on('prioriteAction', function(){ ouvrirSequence(cibleDePriorite()); });
   on('prioriteEcouter', function(){
     deverrouillerAudio();
     setText('prioriteEcouter', 'LECTURE…');
