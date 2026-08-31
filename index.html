@@ -147,6 +147,17 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .nextGoal{background:#f1f0ff;border-radius:16px;padding:13px;margin-top:13px}
 .nextGoal b{display:block;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.09em}
 .nextGoal span{display:block;font-size:12px;line-height:1.4;margin-top:5px;color:#303544}
+.bilanChiffres{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0 4px}
+.bilanChiffre{background:#f7f8fc;border:1px solid var(--line);border-radius:16px;padding:13px 11px;text-align:left}
+.bilanChiffre b{display:block;font-size:20px;letter-spacing:-.03em}
+.bilanChiffre span{display:block;font-size:9.5px;line-height:1.3;color:var(--muted);margin-top:4px}
+.bilanExercices{margin-top:14px}
+.bilanLigne{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.bilanLigne b{font-size:13.5px;display:block}
+.bilanLigne span{font-size:11px;color:var(--muted);display:block;margin-top:3px}
+.bilanEvol{flex:0 0 auto;font-size:12px;font-weight:850;color:var(--accent);text-align:right}
+.bilanEvol.neutre{color:var(--muted);font-weight:750}
+
 .emptyState{background:#fff;border:1px dashed #d6dae8;border-radius:22px;padding:22px;margin:18px 0;color:#606779;font-size:13px;line-height:1.55}
 .emptyState b{display:block;color:var(--ink);font-size:15px;margin-bottom:7px}
 .hidden{display:none}
@@ -208,9 +219,8 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 /* Un seul appel à l'action principal : la recommandation du coach. Le reste
    de l'écran est explicitement secondaire. */
 .accueilTete{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 0}
-.accueilEtat{font:inherit;font-size:11.5px;letter-spacing:.02em;color:#4e5568;font-weight:750;
-  background:#eef0f7;border:1px solid #e0e3ee;border-radius:999px;padding:7px 12px;cursor:pointer}
-.accueilEtat:active{transform:scale(.98)}
+.accueilEtat{font-size:11.5px;letter-spacing:.02em;color:#4e5568;font-weight:750;
+  background:#eef0f7;border:1px solid #e0e3ee;border-radius:999px;padding:7px 12px}
 .heroToday h2{font-size:27px;max-width:340px;margin:24px 0 11px;color:white;line-height:1.18}
 .heroEcouter{display:block;margin:12px auto 0;background:none;border:0;color:#a8abc6;font-size:11.5px;
   text-decoration:underline;cursor:pointer;padding:4px}
@@ -235,7 +245,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 <section id="home" class="screen active">
   <div class="accueilTete">
     <span class="eyebrow" id="dateLabel">—</span>
-    <button class="accueilEtat" id="tileProgress">—</button>
+    <span class="accueilEtat" id="accueilEtat">—</span>
   </div>
 
   <div class="heroToday">
@@ -255,6 +265,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
     <button class="tile" id="tilePresentation"><div class="tileTop"><div class="ico">❶</div><div class="arr">↗</div></div><div><b>Présentation</b><span>2 minutes · séquence 1 seule</span></div></button>
     <button class="tile" id="tileImage"><div class="tileTop"><div class="ico">❷</div><div class="arr">↗</div></div><div><b>Défi image</b><span>Décrire, interpréter · séquence 2</span></div></button>
     <button class="tile" id="tileMotivation"><div class="tileTop"><div class="ico">❸</div><div class="arr">↗</div></div><div><b>Motivations</b><span>Projet, cohérence · séquence 3</span></div></button>
+    <button class="tile" id="tileProgress"><div class="tileTop"><div class="ico">↗</div><div class="arr">↗</div></div><div><b>Progression</b><span>Bilan par exercice, évolution</span></div></button>
     <button class="tile" id="tileCulture"><div class="tileTop"><div class="ico">↯</div><div class="arr">↗</div></div><div><b>Culture &amp; idées</b><span>Réfléchir vite, argumenter mieux</span></div></button>
 
   </div>
@@ -378,6 +389,17 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
   <div class="emptyState" id="progressEmpty">
     <b>Pas encore assez de séances.</b>
     Une courbe n’a de sens qu’à partir de trois séances terminées. AGORA préfère ne rien afficher plutôt qu’une progression inventée.
+  </div>
+
+  <div class="reportCard hidden" id="bilanCard">
+    <div class="reportTop"><b>Bilan</b><span id="bilanPeriode">—</span></div>
+    <div class="bilanChiffres">
+      <div class="bilanChiffre"><b id="bilanSeances">0</b><span>séances terminées</span></div>
+      <div class="bilanChiffre"><b id="bilanMinutes">0</b><span>minutes d’oral</span></div>
+      <div class="bilanChiffre"><b id="bilanTroisieme">0</b><span id="bilanTroisiemeLabel">exercices abordés</span></div>
+    </div>
+    <div class="bilanExercices" id="bilanExercices"></div>
+    <p class="note">L’évolution n’apparaît qu’à partir de deux séances du même exercice. Une séance sans mesure exploitable est signalée comme telle plutôt que comptée pour zéro.</p>
   </div>
 
   <div id="progressBody" class="hidden">
@@ -2228,7 +2250,7 @@ function renderHome(){
   var serie = computeStreak();
   var etat = state.sessions.length + ' séance' + (state.sessions.length>1?'s':'') + ' · ' + minutes + ' min d’oral';
   if(serie > 1) etat += ' · ' + serie + ' jours de suite';
-  setText('tileProgress', state.sessions.length === 0 ? 'Première séance' : etat);
+  setText('accueilEtat', state.sessions.length === 0 ? 'Première séance' : etat);
 
   /* Une seule recommandation, celle du coach. La carte du jour et l'encart de
      priorité disaient la même chose par deux logiques concurrentes. */
@@ -2361,10 +2383,70 @@ function renderImageStats(){
 /* ---------- progression ---------- */
 var progressPeriod = 30;
 
+var LIBELLE_EXERCICE = {
+  oral:'Oral blanc', presentation:'Présentation', image:'Défi image',
+  motivation:'Motivations', culture:'Culture & idées', replay:'Rejeu'
+};
+
+/* Bilan par type d'exercice. Une moyenne globale mélangerait un oral blanc de
+   vingt-cinq minutes et un défi image de huit : elle ne voudrait rien dire. */
+function renderBilanExercices(){
+  var sessions = state.sessions;
+  showEl('bilanCard', sessions.length > 0);
+  if(!sessions.length) return;
+
+  var minutes = Math.round(sessions.reduce(function(n,x){ return n + (x.durationSec||0); },0)/60);
+  var serie = computeStreak();
+  var parType = {};
+  for(var i=0;i<sessions.length;i++){
+    var k = sessions[i].kind || 'oral';
+    if(!parType[k]) parType[k] = [];
+    parType[k].push(sessions[i]);
+  }
+  var types = Object.keys(parType);
+
+  setText('bilanSeances', String(sessions.length));
+  setText('bilanMinutes', String(minutes));
+  if(serie > 1){
+    setText('bilanTroisieme', String(serie));
+    setText('bilanTroisiemeLabel', 'jours de suite');
+  } else {
+    setText('bilanTroisieme', String(types.length));
+    setText('bilanTroisiemeLabel', 'exercice' + (types.length>1?'s':'') + ' abordé' + (types.length>1?'s':''));
+  }
+  setText('bilanPeriode', new Date(sessions[0].date).toLocaleDateString('fr-FR') +
+                          ' – ' + new Date(sessions[sessions.length-1].date).toLocaleDateString('fr-FR'));
+
+  var html = '';
+  for(var t=0;t<types.length;t++){
+    var liste = parType[types[t]];
+    var mn = Math.round(liste.reduce(function(n,x){ return n + (x.durationSec||0); },0)/60);
+    var mesures = liste.filter(function(x){ return typeof x.overall === 'number'; });
+    var dernier = mesures.length ? mesures[mesures.length-1].overall : null;
+
+    var evol, classe = '';
+    if(mesures.length < 2){
+      evol = liste.length < 2 ? '1re séance' : 'pas de mesure';
+      classe = ' neutre';
+    } else {
+      var delta = mesures[mesures.length-1].overall - mesures[0].overall;
+      evol = (delta >= 0 ? '+' : '') + delta + ' pts';
+      if(delta === 0) classe = ' neutre';
+    }
+
+    html += '<div class="bilanLigne"><div><b>' + echapper(LIBELLE_EXERCICE[types[t]] || types[t]) + '</b>' +
+            '<span>' + liste.length + ' séance' + (liste.length>1?'s':'') + ' · ' + mn + ' min' +
+            (dernier === null ? ' · pas de mesure' : ' · niveau ' + dernier) + '</span></div>' +
+            '<div class="bilanEvol' + classe + '">' + echapper(evol) + '</div></div>';
+  }
+  setHTML('bilanExercices', html);
+}
+
 function renderProgress(){
+  renderBilanExercices();
   var sessions = state.sessions.filter(function(s){ return s.overall !== null && s.overall !== undefined; });
   var assez = sessions.length >= 3;
-  showEl('progressEmpty', !assez);
+  showEl('progressEmpty', !assez && state.sessions.length === 0);
   showEl('progressBody', assez);
   if(!assez){ setText('progressTitle','Ta trajectoire commence.'); return; }
 
