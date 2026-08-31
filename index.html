@@ -3,25 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0d1021">
+<meta name="theme-color" content="#f8f6f1">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="icone-agora.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="AGORA">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>AGORA — Sciences Po</title>
 <style>
 :root{
-  --bg:#f6f7fb;--ink:#121526;--muted:#777c91;--card:#ffffff;--line:#e8eaf2;
-  --accent:#625cff;--dark:#0d1021;--dark2:#171a35;--good:#1a9b6f;
+  color-scheme:light;
+  --bg:#f8f6f1;--ink:#18202f;--muted:#717789;--card:#ffffff;--line:#e9e5de;
+  --accent:#635bdb;--dark:#17192c;--dark2:#24233d;--good:#188a68;
+  --coral:#ec6a5c;--sun:#e5a72b;--aqua:#218b91;--sage:#62a074;--lavender:#8177e8;
+  --accent-txt:#6159DB;
+  --coral-txt:#D02A18;
+  --sun-txt:#926712;
+  --aqua-txt:#1D797F;
+  --sage-txt:#497856;
+  --good-txt:#167C5E;
+  --muted:#696F7F;
   --shadow:0 18px 55px rgba(31,35,72,.10);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html{background:var(--bg);background-color:var(--bg);min-height:100%}
+body{margin:0;background:var(--bg);background-color:var(--bg);min-height:100dvh;color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 button{font:inherit;color:inherit}
 .app{max-width:540px;margin:auto;min-height:100vh;padding:env(safe-area-inset-top) 18px calc(28px + env(safe-area-inset-bottom));position:relative;overflow:hidden}
-.app:before{content:"";position:fixed;inset:-20vh auto auto 55%;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(98,92,255,.14),transparent 68%);pointer-events:none;z-index:0}
+.app:before{content:"";position:fixed;inset:-20vh auto auto 55%;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(229,167,43,.16),rgba(236,106,92,.07) 38%,transparent 70%);pointer-events:none;z-index:0}
 .top,.screen{position:relative;z-index:1}
 .top{height:74px;display:flex;align-items:center;justify-content:space-between}
-.brand{font-size:19px;font-weight:850;letter-spacing:.16em}.brand span{color:var(--accent)}
+.brand{font-size:19px;font-weight:850;letter-spacing:.16em;display:inline-flex;align-items:center;gap:2px}.brandMark{width:24.2px;height:24.6px;flex:0 0 auto}.brandA,.brandOnde{fill:none;stroke-linecap:round;stroke-linejoin:round}.brandA{stroke:var(--accent);stroke-width:10}.brandOnde{stroke:var(--coral);stroke-width:6}
 .profile{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted)}
-.avatar{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:var(--dark);color:#fff;font-size:11px;font-weight:800;box-shadow:0 8px 22px rgba(13,16,33,.18)}
+.avatar{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#7a72e8,var(--accent));color:#fff;font-size:11px;font-weight:800;box-shadow:0 8px 22px rgba(99,91,219,.24)}
 .screen{display:none;animation:screenIn .28s ease}.screen.active{display:block}
 @keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:10px;font-weight:800;color:var(--muted)}
@@ -44,10 +61,10 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .btn[disabled]{opacity:.45;cursor:default}
 .heroToday .btn{background:white;color:var(--dark);box-shadow:none}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px}
-.tile{border:1px solid var(--line);background:rgba(255,255,255,.86);backdrop-filter:blur(8px);border-radius:22px;padding:15px;text-align:left;min-height:104px;cursor:pointer;box-shadow:0 8px 30px rgba(34,38,74,.04);display:flex;flex-direction:column;justify-content:space-between}
+.tile{--tile-color:var(--accent);--tile-soft:#efedff;border:1px solid color-mix(in srgb,var(--tile-color) 18%,var(--line));background:linear-gradient(145deg,#fff,color-mix(in srgb,var(--tile-soft) 48%,#fff));backdrop-filter:blur(8px);border-radius:22px;padding:15px;text-align:left;min-height:112px;cursor:pointer;box-shadow:0 8px 30px rgba(52,47,73,.055);display:flex;flex-direction:column;justify-content:space-between;transition:.2s transform,.2s box-shadow}
 .tileTop{display:flex;align-items:center;justify-content:space-between}
-.ico{width:35px;height:35px;border-radius:12px;background:#f0efff;color:var(--accent);display:grid;place-items:center;font-size:16px;font-weight:850}
-.arr{color:#b3b7c8;font-size:18px}
+.ico{width:38px;height:38px;border-radius:13px;background:var(--tile-color);color:#fff;display:grid;place-items:center;box-shadow:0 7px 16px color-mix(in srgb,var(--tile-color) 26%,transparent)}
+.arr{color:var(--tile-color);font-size:18px;background:color-mix(in srgb,var(--tile-color) 10%,transparent);width:27px;height:27px;border-radius:50%;display:grid;place-items:center}
 .tile b{font-size:14px;display:block;margin-top:12px}
 .tile span{font-size:11.5px;line-height:1.35;color:var(--muted);display:block;margin-top:5px}
 .goal{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px 18px;margin-top:16px;color:var(--muted);font-size:12px;box-shadow:0 8px 30px rgba(34,38,74,.035)}
@@ -165,7 +182,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .debriefHero{background:linear-gradient(145deg,#171a36,#0d1021);color:white;border-radius:28px;padding:24px;margin:16px 0 20px}
 .debriefHero .eyebrow{color:#9ea3bd}
 .debriefHero h2{color:white;margin-top:14px}
-.tag{display:inline-flex;border-radius:999px;background:#eeecff;color:var(--accent);padding:7px 10px;font-size:10px;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
+.tag{display:inline-flex;border-radius:999px;background:#fff0e7;color:#A63B2C;padding:7px 10px;font-size:10px;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
 .dimList{margin:14px 0 0;padding:0;list-style:none}
 .dimRow{display:flex;justify-content:space-between;font-size:12px;color:#5d6575;padding:7px 0;border-top:1px solid var(--line)}
 .dimRow b{color:var(--ink)}
@@ -210,6 +227,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .lectureBloc:first-child{margin-top:4px}
 .lectureBloc h4{margin:0 0 8px;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--accent);font-weight:850}
 .lectureBloc ul{margin:0;padding:0;list-style:none}
+ul.lectureBloc{list-style-type:none;list-style-image:none;list-style-position:outside;padding-left:0;margin-left:0}
 .lectureBloc li{position:relative;padding:0 0 0 15px;margin-bottom:7px;font-size:13px;line-height:1.5;color:#404757}
 .lectureBloc li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:#c3c0ff}
 .lectureBloc li.manque:before{background:#f0a58c}
@@ -219,8 +237,8 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 /* Un seul appel à l'action principal : la recommandation du coach. Le reste
    de l'écran est explicitement secondaire. */
 .accueilTete{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 0}
-.accueilEtat{font-size:11.5px;letter-spacing:.02em;color:#4e5568;font-weight:750;
-  background:#eef0f7;border:1px solid #e0e3ee;border-radius:999px;padding:7px 12px}
+.accueilEtat{font:inherit;font-size:11.5px;letter-spacing:.02em;color:#4e5568;font-weight:750;
+  background:#fff4dc;border:1px solid #f1dfb5;border-radius:999px;padding:7px 12px;cursor:pointer}
 .heroToday h2{font-size:27px;max-width:340px;margin:24px 0 11px;color:white;line-height:1.18}
 .heroEcouter{display:block;margin:12px auto 0;background:none;border:0;color:#a8abc6;font-size:11.5px;
   text-decoration:underline;cursor:pointer;padding:4px}
@@ -233,12 +251,156 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
 .lienClair{background:none;border:0;padding:12px 0 0;color:#7b8296;font-size:11.5px;text-decoration:underline;cursor:pointer;display:block;margin:0 auto}
 
 @media(min-width:700px){body{padding:20px}.app{min-height:calc(100vh - 40px);border-radius:34px;background:var(--bg);box-shadow:0 25px 100px rgba(30,34,70,.13)}}
+
+/* couleur de tuile rattachée à l’exercice, pas à sa position */
+#tileOral{--tile-color:var(--accent);--tile-soft:#efedff}
+#tilePresentation{--tile-color:var(--sun);--tile-soft:#fff6de}
+#tileImage{--tile-color:var(--aqua);--tile-soft:#e6f5f4}
+#tileMotivation{--tile-color:var(--sage);--tile-soft:#ecf6ef}
+#tileCulture{--tile-color:var(--coral);--tile-soft:#ffeee9}
+#tileProgress{--tile-color:var(--lavender);--tile-soft:#f0eeff}
+
+/* ---------- une palette par espace (repris de la maquette) ---------- */
+/* Une palette par espace : le violet reste la signature AGORA, mais ne porte
+   plus seul toute la hiérarchie visuelle. */
+.app:has(#oral.active){background:var(--oral-shell,#25233f)}
+
+.app:has(#oral.active) .top{color:#fff;background:transparent}
+
+.app:has(#oral.active) .brandMot{color:inherit}
+.app:has(#oral.active) .brandA{stroke:#a9a3ff}
+
+.app:has(#oral.active) .avatar{background:rgba(255,255,255,.14);box-shadow:none;border:1px solid rgba(255,255,255,.14)}
+
+#oral .darkScreen{background:radial-gradient(circle at 50% 20%,rgba(99,91,219,.30),transparent 31%),radial-gradient(circle at 90% 4%,rgba(129,119,232,.16),transparent 28%),linear-gradient(180deg,var(--dark2),var(--dark))}
+
+
+#sequence{--page-color:var(--accent);--page-soft:#f0eeff;--page-texte:var(--accent-txt)}
+
+#sequence .card{border-top:4px solid var(--page-color);background:linear-gradient(155deg,#fff,var(--page-soft))}
+
+#sequence .eyebrow{color:var(--page-texte,var(--page-color))}
+
+#sequence .btn.accent{background:linear-gradient(135deg,var(--page-color),color-mix(in srgb,var(--page-color) 78%,#17192c));box-shadow:0 12px 25px color-mix(in srgb,var(--page-color) 25%,transparent)}
+
+
+#image .imageExperience{background:radial-gradient(circle at 88% 0%,rgba(229,167,43,.45),transparent 30%),radial-gradient(circle at 0% 100%,rgba(99,91,219,.26),transparent 38%),linear-gradient(145deg,#18353d,#21515a 66%,#29354b)}
+
+#image .imageExperience .imageCard.selected{border-color:#f1c453;box-shadow:0 0 0 4px rgba(241,196,83,.18)}
+
+#image .imagePrep b{color:#f1cf79}
+
+#image .eyebrow{color:var(--aqua-txt)}
+
+
+#culture{--page-color:var(--coral)}
+
+#culture>.eyebrow{color:var(--coral-txt)}
+
+#culture .card{border-top:4px solid var(--coral);background:linear-gradient(155deg,#fff,#fff3ea)}
+
+#culture .lectureBloc li:before{background:var(--coral)}
+#sequence .lectureBloc li:before{background:var(--page-color)}
+#sequence .lectureBloc h4{color:var(--page-texte,var(--page-color))}
+
+#culture .btn.accent{background:linear-gradient(135deg,var(--coral),#d75667);box-shadow:0 12px 25px rgba(236,106,92,.25)}
+
+
+#progress>.eyebrow{color:var(--aqua-txt)}
+
+#progress .trendCard{background:radial-gradient(circle at 92% 5%,rgba(99,91,219,.30),transparent 34%),linear-gradient(145deg,#173b40,#21545b)}
+
+#progress .trendLine{stroke:#f2bb4d}
+
+#progress .reportCard{border-top:4px solid var(--aqua);background:linear-gradient(155deg,#fff,#edf8f5)}
+
+#progress .nextGoal{background:#e8f6f3}
+
+#progress .nextGoal b{color:var(--aqua)}
+
+#progress .periodBtn.active{background:var(--aqua);border-color:var(--aqua)}
+
+#progress .delta{color:var(--aqua)}
+
+#progress .trendCard .delta{color:#8fddd2}
+
+#progress .sparkCard{border-color:#dceeea}
+
+
+#debrief .debriefHero{background:radial-gradient(circle at 90% 0%,rgba(236,106,92,.48),transparent 38%),linear-gradient(145deg,#25233d,#17192c)}
+
+#debrief .card:nth-of-type(1){border-left:4px solid var(--good)}
+
+#debrief .card:nth-of-type(2){border-left:4px solid var(--coral)}
+
+#debrief .card:nth-of-type(3){border-left:4px solid var(--sun)}
+
+#debrief .btn.accent{background:linear-gradient(135deg,var(--accent),var(--coral));box-shadow:0 12px 25px rgba(99,91,219,.22)}
+body{padding:20px}
+.app{min-height:calc(100vh - 40px);border-radius:34px;background:var(--bg);box-shadow:0 25px 100px rgba(30,34,70,.13)}
+
+.uiIcon{width:19px;height:19px;display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.micIcon .uiIcon{width:30px;height:30px;stroke-width:1.7}
+
+/* ---------- 2 et 5 · chaque écran reprend la couleur de sa carte ---------- */
+.app:has(#oral.active)[data-oral-kind="oral"]{--oral-shell:#211f3e}
+.app:has(#oral.active)[data-oral-kind="presentation"]{--oral-shell:#3a3021}
+.app:has(#oral.active)[data-oral-kind="image"]{--oral-shell:#19363b}
+.app:has(#oral.active)[data-oral-kind="motivation"]{--oral-shell:#20362b}
+.app:has(#oral.active)[data-oral-kind="culture"]{--oral-shell:#3d2429}
+#oral .darkScreen[data-kind="oral"]{background:radial-gradient(circle at 50% 20%,rgba(99,91,219,.30),transparent 31%),radial-gradient(circle at 90% 4%,rgba(129,119,232,.16),transparent 28%),linear-gradient(180deg,var(--dark2),var(--dark))}
+#oral .darkScreen[data-kind="presentation"]{background:radial-gradient(circle at 85% 8%,rgba(229,167,43,.30),transparent 29%),radial-gradient(circle at 5% 68%,rgba(129,119,232,.12),transparent 35%),linear-gradient(180deg,#3a3021,#241f1b)}
+#oral .darkScreen[data-kind="image"]{background:radial-gradient(circle at 85% 8%,rgba(33,139,145,.36),transparent 30%),radial-gradient(circle at 4% 68%,rgba(229,167,43,.16),transparent 35%),linear-gradient(180deg,#21363f,#151c2b)}
+#oral .darkScreen[data-kind="motivation"]{background:radial-gradient(circle at 86% 8%,rgba(98,160,116,.34),transparent 30%),radial-gradient(circle at 5% 68%,rgba(236,106,92,.16),transparent 35%),linear-gradient(180deg,#26373a,#171b2d)}
+#oral .darkScreen[data-kind="culture"]{background:radial-gradient(circle at 86% 8%,rgba(236,106,92,.32),transparent 30%),radial-gradient(circle at 5% 68%,rgba(229,167,43,.18),transparent 35%),linear-gradient(180deg,#382b3a,#1b192b)}
+#oral .darkScreen[data-kind="presentation"] .orb{background:radial-gradient(circle at 35% 30%,#f5ca6c,#d99728 38%,#413651 72%);box-shadow:0 0 0 18px rgba(229,167,43,.07),0 0 80px rgba(229,167,43,.24)}
+#oral .darkScreen[data-kind="image"] .orb{background:radial-gradient(circle at 35% 30%,#70c7c2,#218b91 40%,#263b50 72%);box-shadow:0 0 0 18px rgba(33,139,145,.08),0 0 80px rgba(33,139,145,.27)}
+#oral .darkScreen[data-kind="motivation"] .orb{background:radial-gradient(circle at 35% 30%,#9bcca3,#559269 40%,#2e3d4d 72%);box-shadow:0 0 0 18px rgba(98,160,116,.08),0 0 80px rgba(98,160,116,.25)}
+#oral .darkScreen[data-kind="culture"] .orb{background:radial-gradient(circle at 35% 30%,#f49a7e,#d65d58 40%,#493049 72%);box-shadow:0 0 0 18px rgba(236,106,92,.08),0 0 80px rgba(236,106,92,.26)}
+#oral .darkScreen[data-kind="presentation"] .micButton{background:linear-gradient(145deg,#efbf55,#c98624);box-shadow:0 15px 40px rgba(229,167,43,.28)}
+#oral .darkScreen[data-kind="image"] .micButton{background:linear-gradient(145deg,#54b7b3,#218b91);box-shadow:0 15px 40px rgba(33,139,145,.30)}
+#oral .darkScreen[data-kind="motivation"] .micButton{background:linear-gradient(145deg,#82b98f,#559269);box-shadow:0 15px 40px rgba(98,160,116,.28)}
+#oral .darkScreen[data-kind="culture"] .micButton{background:linear-gradient(145deg,#f0826e,#d65d58);box-shadow:0 15px 40px rgba(236,106,92,.30)}
+
+
+
+
+
+
+#tileProgress{--tile-color:var(--accent);--tile-soft:#efedff}
+#progress>.eyebrow{color:var(--accent-txt)}
+#progress .reportCard{border-top:4px solid var(--accent)}
+#progress .nextGoal{background:#efedff}
+#progress .nextGoal b{color:var(--accent-txt)}
+#progress .periodBtn.active{background:var(--accent);border-color:var(--accent)}
+#progress .delta{color:var(--accent-txt)}
+#sequence[data-kind="presentation"]{--page-color:var(--sun);--page-soft:#fff5d9;--page-texte:var(--sun-txt)}
+#sequence[data-kind="image"]{--page-color:var(--aqua);--page-soft:#e7f6f5;--page-texte:var(--aqua-txt)}
+#sequence[data-kind="motivation"]{--page-color:var(--sage);--page-soft:#ebf6ee;--page-texte:var(--sage-txt)}
+#sequence[data-kind="culture"]{--page-color:var(--coral);--page-soft:#ffeee9;--page-texte:var(--coral-txt)}
+
+/* textes de service : suivent la couleur de l'écran quand il en a une */
+#culture .challenge .timer{color:var(--coral-txt)}
+#image .imageStat b{color:var(--aqua-txt)}
+#debrief .reportTop b,#debrief .nextGoal b{color:var(--coral-txt)}
+.lectureBloc h4{color:var(--accent-txt)}
+.delta,.reportTop b,.nextGoal b,.bilanEvol{color:var(--accent-txt)}
+#progress .delta,#progress .reportTop b,#progress .nextGoal b,#progress .bilanEvol{color:var(--accent-txt)}
 </style>
 </head>
 <body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6"/></symbol>
+  <symbol id="i-presentation" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M6.5 20v-2.5a5.5 5.5 0 0 1 11 0V20M5 4h14"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9" r="1.5"/><path d="m5.5 17 4.2-4.2 3.1 3 2.1-2 3.6 3.2"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m15 9 5-5M16 4h4v4"/></symbol>
+  <symbol id="i-ideas" viewBox="0 0 24 24"><path d="M9 18h6M9.5 21h5M8.2 15.4A7 7 0 1 1 15.8 15.4c-.8.6-.8 1.1-.8 1.6H9c0-.5 0-1-.8-1.6Z"/><path d="M12 5v2M6.8 7.2l1.4 1.4M17.2 7.2l-1.4 1.4"/></symbol>
+  <symbol id="i-oral" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4A2.5 2.5 0 0 1 4 13.5Z"/><path d="M8 8h8M8 11.5h5"/></symbol>
+  <symbol id="i-progress" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 2 5-6"/><path d="M16 7h3v3"/></symbol>
+</defs></svg>
 <main class="app">
 <header class="top">
-  <div class="brand">AGORA<span>.</span></div>
+  <div class="brand"><svg class="brandMark" viewBox="14 11 68 69" role="img" aria-label="AGORA"><path class="brandA" d="M19 75 48 16 77 75"/><path class="brandOnde" d="M29 55h7l5-10 8 21 7-27 8 21 5-5h8"/></svg><span class="brandMot">GORA</span></div>
   <div class="profile"><div class="avatar" id="avatarInitial">P</div></div>
 </header>
 
@@ -261,12 +423,12 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
   </div>
 
   <div class="grid">
-    <button class="tile" id="tileOral"><div class="tileTop"><div class="ico">◉</div><div class="arr">↗</div></div><div><b>Oral blanc</b><span>≈ 25 min · les trois séquences</span></div></button>
-    <button class="tile" id="tilePresentation"><div class="tileTop"><div class="ico">❶</div><div class="arr">↗</div></div><div><b>Présentation</b><span>2 minutes · séquence 1 seule</span></div></button>
-    <button class="tile" id="tileImage"><div class="tileTop"><div class="ico">❷</div><div class="arr">↗</div></div><div><b>Défi image</b><span>Décrire, interpréter · séquence 2</span></div></button>
-    <button class="tile" id="tileMotivation"><div class="tileTop"><div class="ico">❸</div><div class="arr">↗</div></div><div><b>Motivations</b><span>Projet, cohérence · séquence 3</span></div></button>
-    <button class="tile" id="tileProgress"><div class="tileTop"><div class="ico">↗</div><div class="arr">↗</div></div><div><b>Progression</b><span>Bilan par exercice, évolution</span></div></button>
-    <button class="tile" id="tileCulture"><div class="tileTop"><div class="ico">↯</div><div class="arr">↗</div></div><div><b>Culture &amp; idées</b><span>Réfléchir vite, argumenter mieux</span></div></button>
+    <button class="tile" id="tileOral"><div class="tileTop"><div class="ico"><svg class="uiIcon"><use href="#i-oral"/></svg></div><div class="arr">↗</div></div><div><b>Oral blanc</b><span>≈ 25 min · les trois séquences</span></div></button>
+    <button class="tile" id="tilePresentation"><div class="tileTop"><div class="ico"><svg class="uiIcon"><use href="#i-presentation"/></svg></div><div class="arr">↗</div></div><div><b>Présentation</b><span>2 minutes · séquence 1 seule</span></div></button>
+    <button class="tile" id="tileImage"><div class="tileTop"><div class="ico"><svg class="uiIcon"><use href="#i-image"/></svg></div><div class="arr">↗</div></div><div><b>Défi image</b><span>Décrire, interpréter · séquence 2</span></div></button>
+    <button class="tile" id="tileMotivation"><div class="tileTop"><div class="ico"><svg class="uiIcon"><use href="#i-target"/></svg></div><div class="arr">↗</div></div><div><b>Motivations</b><span>Projet, cohérence · séquence 3</span></div></button>
+    <button class="tile" id="tileCulture"><div class="tileTop"><div class="ico"><svg class="uiIcon"><use href="#i-ideas"/></svg></div><div class="arr">↗</div></div><div><b>Culture &amp; idées</b><span>Réfléchir vite, argumenter mieux</span></div></button>
+    <button class="tile" id="tileProgress"><div class="tileTop"><div class="ico"><svg class="uiIcon"><use href="#i-progress"/></svg></div><div class="arr">↗</div></div><div><b>Progression</b><span>Bilan par exercice, évolution</span></div></button>
 
   </div>
 
@@ -292,7 +454,7 @@ h3{font-size:19px;line-height:1.3;margin:12px 0 9px;font-weight:740}
         <span class="on" id="p1"></span><span id="p2"></span><span id="p3"></span>
       </div>
 
-      <button class="micButton" id="micButton" aria-label="Parler au jury"><span class="micIcon">●</span></button>
+      <button class="micButton" id="micButton" aria-label="Parler au jury"><span class="micIcon"><svg class="uiIcon"><use href="#i-mic"/></svg></span></button>
       <div class="micLabel" id="micLabel">LANCER L’ORAL</div>
       <div class="voiceHint" id="voiceHint">Le jury posera la question à voix haute. Réponds ensuite naturellement, comme le jour de l’entretien.</div>
 
@@ -2163,6 +2325,12 @@ function startSession(kind){
   clockStop();
   stopVoice();
   session = newSession(kind);
+  /* Étiquette de thème : la feuille de style s'en sert pour donner à l'oral la
+     couleur de la carte correspondante sur l'accueil. Aucun effet fonctionnel. */
+  var appSurface = document.querySelector('.app');
+  if(appSurface) appSurface.setAttribute('data-oral-kind', kind === 'replay' ? 'oral' : kind);
+  var oralSurface = document.querySelector('#oral .darkScreen');
+  if(oralSurface) oralSurface.setAttribute('data-kind', kind === 'replay' ? 'oral' : kind);
   var e = $('voiceError'); if(e) e.className = 'voiceError';
   clearTranscript();
 
@@ -2532,6 +2700,8 @@ function ouvrirSequence(nom){
   var seq = SEQUENCES[nom];
   if(!seq) return;
   sequenceCourante = nom;
+  var sequenceScreen = $('sequence');
+  if(sequenceScreen) sequenceScreen.setAttribute('data-kind', nom);
   setText('seqEyebrow', seq.eyebrow);
   setText('seqTitre', seq.titre);
   setText('seqLead', seq.lead);
