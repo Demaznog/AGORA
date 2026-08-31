@@ -2074,12 +2074,10 @@ function sayNext(segments, i, token){
   } catch(e){ suivant(); }
 }
 function stopVoice(){
-  speechToken++;
   voice.manualStop = true;          /* coupe toute relance automatique d'écoute */
-  try { if(audioJury){ audioJury.pause(); audioJury.removeAttribute('src'); } } catch(e){}
-  try { if('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch(e){}
+  libererVoieAudio();
   try { if(recognition) { if(recognition.abort) recognition.abort(); else recognition.stop(); } } catch(e){}
-  voice.listening = false; voice.speaking = false;
+  voice.listening = false;
 }
 
 var ERREURS_MICRO = {
@@ -2180,6 +2178,7 @@ function creerReco(){
 
 function demarrerEcoute(){
   if(!session || voice.listening) return;
+  libererVoieAudio();
   recognition = creerReco();
   if(!recognition){ finirEcoute(true); return; }
   try { recognition.start(); }
@@ -2274,10 +2273,27 @@ function toggleListening(){
   var box = $('liveTranscript');
   if(box){ box.className = 'transcript voiceTranscript'; box.textContent = '…'; }
 
-  /* iOS garde la voie audio ouverte après la synthèse : on la libère
-     explicitement et on laisse un court délai avant d'ouvrir le micro. */
+  /* iOS garde la voie audio ouverte après la parole du jury : tant qu'elle
+     l'est, la reconnaissance s'ouvre mais ne reçoit rien. On libère les DEUX
+     sources — synthèse du navigateur ET élément audio de la voix neuronale —
+     puis on laisse un court délai avant d'ouvrir le micro. */
+  libererVoieAudio();
+  setTimeout(demarrerEcoute, 260);
+}
+
+function libererVoieAudio(){
+  speechToken++;                       /* invalide tout énoncé en cours */
   try { if('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch(e){}
-  setTimeout(demarrerEcoute, 220);
+  try {
+    if(audioJury){
+      audioJury.pause();
+      audioJury.onended = null;
+      audioJury.onerror = null;
+      audioJury.removeAttribute('src');
+      if(typeof audioJury.load === 'function') audioJury.load();
+    }
+  } catch(e){}
+  voice.speaking = false;
 }
 
 /* ============================================================
